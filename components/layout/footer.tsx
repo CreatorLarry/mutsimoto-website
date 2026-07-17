@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/ui/brand-mark";
 
 const productLinks = ["Oil Filters", "Fuel Filters", "Air Filters"];
@@ -29,14 +29,14 @@ export function Footer() {
         <div>
           <h2 className="footer-title">Contact</h2>
           <div className="mt-5 space-y-4 text-sm text-[#aeb9c8]">
-            <p className="flex gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#c81920]" />Industrial Area, Nairobi, Kenya</p>
-            <a href="tel:+254700000000" className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#c81920]" />+254 700 000 000</a>
-            <a href="mailto:sales@mutsimoto.co.ke" className="block hover:text-white">sales@mutsimoto.co.ke</a>
+            <p className="flex gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#c81920]" />Nakuru Head Office, Nakuru, Kenya</p>
+            <a href="tel:+254721901129" className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#c81920]" />+254 721 901 129</a>
+            <a href="mailto:sales@mutsimoto.co.ke" className="flex gap-3 hover:text-white"><Mail className="size-4 shrink-0 text-[#c81920]" />sales@mutsimoto.co.ke</a>
           </div>
         </div>
       </div>
       <div className="border-t border-[#25354b]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-[#8190a4] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10"><p>© {new Date().getFullYear()} Mutsimoto Motor Company. All rights reserved.</p><p>Filtration built for performance.</p></div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-5 text-xs text-[#8190a4] sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10"><p>© {new Date().getFullYear()} Mutsimoto Motor Company. All rights reserved.</p><p>Design and Built by Mwangi Ngugi</p></div>
       </div>
     </footer>
   );

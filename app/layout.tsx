@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(origin),
     title: {
-      default: "Mutsimoto Motor Company | Filtration Built for Performance",
+      default: "Mutsimoto Motor Company | Powered by Passion",
       template: "%s | Mutsimoto Motor Company",
     },
     description: "Oil, fuel, and air filtration solutions for automotive fleets and industrial equipment.",
@@ -38,16 +38,16 @@ export async function generateMetadata(): Promise<Metadata> {
       apple: "/favicon.png",
     },
     openGraph: {
-      title: "Mutsimoto Motor Company | Filtration Built for Performance",
+      title: "Mutsimoto Motor Company | Powered by Passion",
       description: "Oil, fuel, and air filtration solutions for automotive fleets and industrial equipment.",
       url: origin,
       siteName: "Mutsimoto Motor Company",
       type: "website",
-      images: [{ url: `${origin}/og.png`, width: 1734, height: 899, alt: "Mutsimoto filtration built for performance" }],
+      images: [{ url: `${origin}/og.png`, width: 1734, height: 899, alt: "Mutsimoto Powered by Passion" }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Mutsimoto Motor Company | Filtration Built for Performance",
+      title: "Mutsimoto Motor Company | Powered by Passion",
       description: "Oil, fuel, and air filtration solutions for automotive fleets and industrial equipment.",
       images: [`${origin}/og.png`],
     },

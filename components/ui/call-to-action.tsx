@@ -11,7 +11,7 @@ interface CallToActionProps {
   secondaryHref?: string;
 }
 
-export function CallToAction({ eyebrow = "Talk to our team", title, description, primaryLabel = "Request a Quote", primaryHref = "/contact?type=product", secondaryLabel = "WhatsApp Us", secondaryHref = "https://wa.me/254700000000" }: CallToActionProps) {
+export function CallToAction({ eyebrow = "Talk to our team", title, description, primaryLabel = "Request a Quote", primaryHref = "/contact?type=product", secondaryLabel = "WhatsApp Us", secondaryHref = "https://wa.me/254721901129" }: CallToActionProps) {
   return (
     <section className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <div className="blueprint-grid-dark dark-panel mx-auto flex max-w-7xl flex-col gap-8 overflow-hidden rounded-[28px] border-t-4 border-[#e52833] bg-[#07172b] px-6 py-12 text-white shadow-[0_24px_70px_rgba(7,23,43,0.18)] sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-14 lg:py-16">
