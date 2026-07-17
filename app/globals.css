@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf8f3;
+  --foreground: #0b1b31;
+  --surface: #fffdf9;
+  --surface-warm: #fff4ec;
+  --surface-cool: #edf5f3;
+  --brand-red: #e52833;
+  --brand-navy: #07172b;
+  --brand-teal: #2f8178;
+  --brand-amber: #e5a93f;
+  --font-body: "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: "Courier New", Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 8% 16%, rgba(229, 40, 51, 0.035), transparent 24rem),
+    radial-gradient(circle at 92% 68%, rgba(47, 129, 120, 0.045), transparent 28rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  overflow: clip;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+
+::selection { background: #c81920; color: #ffffff; }
+
+@layer components {
+  .button-primary {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#e52833] bg-[#e52833] px-6 py-3 text-sm font-bold text-white shadow-[0_8px_24px_rgba(229,40,51,0.18)] transition-all hover:-translate-y-0.5 hover:border-[#c91923] hover:bg-[#c91923] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e52833] focus-visible:ring-offset-2;
+  }
+
+  .button-dark {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#07172b] bg-[#07172b] px-6 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:border-[#e52833] hover:bg-[#e52833] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e52833] focus-visible:ring-offset-2;
+  }
+
+  .footer-title {
+    @apply text-xs font-black uppercase tracking-[0.16em] text-white;
+  }
+}
+
+.blueprint-grid {
+  background-image:
+    linear-gradient(rgba(33, 58, 88, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 58, 88, 0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.blueprint-grid-dark {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.filter-stage::before,
+.filter-stage::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(90, 105, 124, 0.18);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.filter-stage::before { width: 210px; height: 210px; place-self: center; }
+.filter-stage::after { width: 270px; height: 270px; place-self: center; }
+
+.filter-stage {
+  background-image:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.88), transparent 55%),
+    linear-gradient(135deg, transparent 55%, rgba(7, 23, 43, 0.035));
+}
+
+.filter-stage.bg-\[\#09172a\] {
+  background-image: radial-gradient(circle at 50% 45%, #233752, #07172b 66%);
+}
+
+.filter-canister {
+  position: relative;
+  z-index: 1;
+  width: 122px;
+  height: 168px;
+  border-radius: 16px 16px 24px 24px;
+  background: linear-gradient(90deg, #101922 0%, #2f3a44 24%, #111a22 60%, #05090d 100%);
+  box-shadow: 20px 30px 45px rgba(8, 19, 34, 0.28), inset 0 0 0 1px rgba(255,255,255,.08);
+  transform: rotate(-7deg);
+}
+
+.filter-canister-fuel { height: 178px; border-radius: 12px 12px 30px 30px; }
+.filter-canister-top { position: absolute; inset: -9px 7px auto; height: 20px; border-radius: 50%; background: #aeb6bd; border: 4px solid #2b343c; box-shadow: inset 0 0 0 3px #6e7881; }
+.filter-canister-base { position: absolute; inset: auto 8px -4px; height: 12px; border-radius: 50%; background: #090f15; border: 1px solid #3a444d; }
+.filter-canister-label { position: absolute; inset: 49px 0 auto; display: grid; gap: 5px; border-block: 2px solid #c81920; background: #f0f1f2; padding: 13px 7px; text-align: center; color: #0b1b31; }
+.filter-canister-label span { font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+.filter-canister-label small { font-size: 8px; font-weight: 800; letter-spacing: .14em; color: #c81920; }
+
+.filter-air {
+  position: relative;
+  z-index: 1;
+  width: 190px;
+  height: 118px;
+  padding: 13px;
+  border: 8px solid #141d26;
+  border-radius: 13px;
+  background: #d3d6d8;
+  box-shadow: 18px 22px 35px rgba(8, 19, 34, 0.22), inset 0 0 0 2px #69737b;
+  transform: perspective(500px) rotateX(8deg) rotateZ(-6deg);
+}
+
+.filter-air-pleats {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, #d8c5a2 0 6px, #9f8964 6px 9px, #eadbbd 9px 14px);
+  border: 2px solid #74654d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
