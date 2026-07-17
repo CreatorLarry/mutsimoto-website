@@ -34,10 +34,10 @@ function elementSpecs(
 
 export const products: Product[] = [
   {
-    id: "pfl-2074",
+    id: "sl-2074",
     slug: "pfl-2074-sunny-oil-filter",
     name: "Sunny Oil Filter",
-    partNumber: "PFL 2074",
+    partNumber: "SL 2074",
     category: "Oil Filters",
     shortDescription: "Full-flow engine oil protection for popular passenger vehicles.",
     description: "A durable full-flow oil filter engineered for dependable contaminant capture, stable oil pressure, and clean starts across everyday service intervals.",
@@ -46,7 +46,8 @@ export const products: Product[] = [
     engineModels: ["1NZ-FE", "2NZ-FE", "1KR-FE"],
     equipmentTypes: ["Passenger vehicle", "Compact SUV"],
     oemNumbers: ["me034611", "me034605"],
-    image: "oil-filter-standard",
+    image: "/images/sl-2074-front.jpg",
+    images: ["/images/sl-2074-front.jpg", "/images/sl-2074-side.jpg", "/images/sl-2074-top.jpg"],
     specifications: spinOnSpecs("75 mm", "68 mm", "3/4-16 UNF", "Synthetic blend", "1.0 bar"),
     availability: "In stock",
     featured: true,

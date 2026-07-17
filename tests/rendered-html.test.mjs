@@ -34,6 +34,6 @@ test("ships product-specific content and removes the starter preview", async () 
   assert.match(layout, /Mutsimoto Motor Company/);
   assert.doesNotMatch(home, /Your site is taking shape|SkeletonPreview/);
 
-  const partNumbers = productData.match(/partNumber:\s*"[A-Z0-9-]+"/g) ?? [];
+  const partNumbers = productData.match(/partNumber:\s*"[A-Z0-9 -]+"/g) ?? [];
   assert.ok(partNumbers.length >= 12, "expected at least twelve mock products");
 });

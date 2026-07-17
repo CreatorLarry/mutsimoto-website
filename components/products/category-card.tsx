@@ -8,7 +8,7 @@ export function CategoryCard({ category }: { category: Category }) {
 
   return (
     <article className={`group overflow-hidden rounded-[26px] border border-t-4 border-[#e0e6ed] ${accent} shadow-[0_10px_35px_rgba(7,23,43,0.045)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_50px_rgba(7,23,43,0.1)]`}>
-      <FilterVisual category={category.name} compact />
+      <div className="h-48"><FilterVisual category={category.name} compact /></div>
       <div className="p-7">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#d51f2a]">Product family</p>
         <h3 className="mt-3 text-2xl font-extrabold tracking-[-0.03em] text-[#07172b]">{category.name}</h3>

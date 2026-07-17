@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function BrandMark({ light = false }: { light?: boolean }) {
@@ -8,9 +9,11 @@ export function BrandMark({ light = false }: { light?: boolean }) {
       aria-label="Mutsimoto Motor Company home"
     >
       <span className="grid size-14 shrink-0 place-items-center rounded-[14px] p-1 transition-transform group-hover:-rotate-3">
-        <img
+        <Image
           src="/images/main-logo.png"
           alt="Mutsimoto logo"
+          width={56}
+          height={56}
           className="h-full w-full object-contain"
         />
       </span>

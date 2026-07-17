@@ -23,6 +23,7 @@ export interface Product {
   equipmentTypes: string[];
   oemNumbers: string[];
   image: string;
+  images?: string[];
   specifications: ProductSpecification[];
   availability: Availability;
   featured?: boolean;
