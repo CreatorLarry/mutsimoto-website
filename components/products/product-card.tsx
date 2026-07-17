@@ -10,10 +10,10 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between gap-4">
           <span className="rounded-full bg-[#fff0f1] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#d51f2a]">{product.category}</span>
-          <span className="font-mono text-xs font-bold text-[#718095]">{product.partNumber}</span>
+          <span className="font-mono text-xs font-bold text-[#526176]">{product.partNumber}</span>
         </div>
         <h3 className="mt-4 text-xl font-extrabold tracking-[-0.03em] text-[#07172b]"><Link href={`/products/${product.slug}`} className="transition-colors hover:text-[#d51f2a]">{product.name}</Link></h3>
-        <p className="mt-3 text-sm leading-6 text-[#68768a]">{product.shortDescription}</p>
+        <p className="mt-3 text-sm leading-6 text-[#526176]">{product.shortDescription}</p>
         <p className="mt-5 border-t border-[#edf0f3] pt-4 text-xs font-semibold text-[#516176]">{product.equipmentTypes.slice(0, 2).join(" · ")}</p>
         <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
           <Link href={`/products/${product.slug}`} className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-[#07172b] px-3 text-xs font-bold text-white transition-all hover:bg-[#d51f2a]">View details <ArrowRight className="size-3.5" /></Link>

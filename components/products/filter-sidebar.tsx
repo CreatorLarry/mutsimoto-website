@@ -34,7 +34,7 @@ export function FilterSidebar({ filters, options, onChange, onReset, className }
 
   return (
     <aside className={className} aria-label="Product filters">
-      <div className="flex items-center justify-between border-b border-[#e2e7ed] pb-4"><h2 className="text-lg font-extrabold text-[#07172b]">Filter products</h2><button type="button" onClick={onReset} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-[#68768a] hover:bg-[#f1f4f7] hover:text-[#d51f2a]"><RotateCcw className="size-3.5" /> Reset</button></div>
+      <div className="flex items-center justify-between border-b border-[#e2e7ed] pb-4"><h2 className="text-lg font-extrabold text-[#07172b]">Filter products</h2><button type="button" onClick={onReset} className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-[#526176] hover:bg-[#f1f4f7] hover:text-[#d51f2a]"><RotateCcw className="size-3.5" /> Reset</button></div>
       <div className="space-y-5 pt-5">
         <label className="block text-[11px] font-extrabold text-[#435166]">Product category
           <select className={selectClass} value={filters.category} onChange={(event) => update("category", event.target.value as CatalogueFilters["category"])}><option value="">All categories</option><option>Oil Filters</option><option>Fuel Filters</option><option>Air Filters</option></select>

@@ -16,7 +16,7 @@ export default function BranchesPage() {
         { icon: PackageCheck, title: "Availability checks", text: "Confirm stock and lead times before travelling to a branch." },
         { icon: Headset, title: "Application support", text: "Get help with part numbers, fitment, and OEM cross-references." },
         { icon: Building2, title: "Dealer & fleet service", text: "Discuss recurring requirements and multi-location support." },
-      ].map(({ icon: Icon, title, text }, index) => <article key={title} className="flex gap-4 rounded-[20px] border border-[#cee2de] bg-[#f8fcfb] p-5"><span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${index === 1 ? "bg-[#ffe5df] text-[#d51f2a]" : "bg-[#dceeea] text-[#2f8178]"}`}><Icon className="size-5" /></span><div><h2 className="font-extrabold text-[#07172b]">{title}</h2><p className="mt-2 text-sm leading-6 text-[#68768a]">{text}</p></div></article>)}</div></section>
+      ].map(({ icon: Icon, title, text }, index) => <article key={title} className="flex gap-4 rounded-[20px] border border-[#cee2de] bg-[#f8fcfb] p-5"><span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${index === 1 ? "bg-[#ffe5df] text-[#d51f2a]" : "bg-[#dceeea] text-[#2f8178]"}`}><Icon className="size-5" /></span><div><h2 className="font-extrabold text-[#07172b]">{title}</h2><p className="mt-2 text-sm leading-6 text-[#526176]">{text}</p></div></article>)}</div></section>
       <CallToAction title="Not sure which branch to contact?" description="Send one enquiry and our central team will route it to the right branch or technical specialist." />
     </>
   );

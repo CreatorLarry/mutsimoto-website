@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
 
 const navigation = [
   { label: "Home", href: "/" },
-  { label: "Products", href: "/products" },
+  { label: "Product Catalogue", href: "/products" },
   { label: "Applications", href: "/applications" },
   { label: "Downloads", href: "/downloads" },
   { label: "About Us", href: "/about" },

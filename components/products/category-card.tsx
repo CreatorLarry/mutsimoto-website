@@ -12,7 +12,7 @@ export function CategoryCard({ category }: { category: Category }) {
       <div className="p-7">
         <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#d51f2a]">Product family</p>
         <h3 className="mt-3 text-2xl font-extrabold tracking-[-0.03em] text-[#07172b]">{category.name}</h3>
-        <p className="mt-3 text-sm leading-6 text-[#68768a]">{category.description}</p>
+        <p className="mt-3 text-sm leading-6 text-[#526176]">{category.description}</p>
         <Link href={`/products?category=${encodeURIComponent(category.name)}`} className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#07172b] transition-colors group-hover:text-[#d51f2a]">Explore range <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>
       </div>
     </article>
