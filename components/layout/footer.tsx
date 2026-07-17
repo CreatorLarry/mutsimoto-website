@@ -7,7 +7,7 @@ const companyLinks = [{ label: "About Us", href: "/about" }, { label: "Applicati
 
 export function Footer() {
   return (
-    <footer className="mt-8 bg-[#061326] text-white">
+    <footer className="dark-panel mt-8 border-t-4 border-[#e52833] bg-[#061326] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.8fr_1fr] lg:px-10 lg:py-20">
         <div>
           <BrandMark light />

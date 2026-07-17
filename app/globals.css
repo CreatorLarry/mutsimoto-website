@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f3;
+  --background: #f7f2ea;
   --foreground: #0b1b31;
   --surface: #fffdf9;
   --surface-warm: #fff4ec;
@@ -30,14 +30,21 @@ html { scroll-behavior: smooth; }
 body {
   min-width: 320px;
   background:
-    radial-gradient(circle at 8% 16%, rgba(229, 40, 51, 0.035), transparent 24rem),
-    radial-gradient(circle at 92% 68%, rgba(47, 129, 120, 0.045), transparent 28rem),
+    radial-gradient(circle at 8% 16%, rgba(229, 40, 51, 0.065), transparent 24rem),
+    radial-gradient(circle at 92% 68%, rgba(47, 129, 120, 0.075), transparent 28rem),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
   line-height: 1.65;
   letter-spacing: 0.01em;
   text-rendering: optimizeLegibility;
+}
+
+.dark-panel h1,
+.dark-panel h2,
+.dark-panel h3,
+.dark-panel h4 {
+  color: #ffffff;
 }
 
 main {

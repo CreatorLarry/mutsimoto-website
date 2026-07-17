@@ -33,8 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: "Oil, fuel, and air filtration solutions for automotive fleets and industrial equipment.",
     keywords: ["oil filters", "fuel filters", "air filters", "automotive filtration", "industrial filters", "Mutsimoto"],
     icons: {
-      icon: "/favicon.svg",
-      shortcut: "/favicon.svg",
+      icon: "/favicon.png",
+      shortcut: "/favicon.png",
+      apple: "/favicon.png",
     },
     openGraph: {
       title: "Mutsimoto Motor Company | Filtration Built for Performance",

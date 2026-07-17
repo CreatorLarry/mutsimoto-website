@@ -24,6 +24,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#e8ded5] bg-[#fffdf9]/95 backdrop-blur-xl">
+      <div className="h-1 bg-[linear-gradient(90deg,#e52833_0_48%,#e5a93f_48%_62%,#2f8178_62%_100%)]" aria-hidden="true" />
       <div className="mx-auto flex h-[82px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
         <BrandMark />
         <nav className="hidden items-center gap-1 rounded-full bg-[#edf4f2] p-1.5 xl:flex" aria-label="Main navigation">
