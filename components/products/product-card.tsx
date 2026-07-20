@@ -6,7 +6,7 @@ import type { Product } from "@/types";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[22px] border border-[#e6ddd5] bg-[#fffdf9] shadow-[0_8px_28px_rgba(7,23,43,0.045)] transition-all duration-300 hover:-translate-y-1 hover:border-[#c7d0db] hover:shadow-[0_18px_45px_rgba(7,23,43,0.1)]">
-      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="block aspect-[4/3] overflow-hidden bg-[#f3f0e8]"><FilterVisual category={product.category} compact imageSrc={product.image} /></Link>
+      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="block aspect-square overflow-hidden border-b border-[#ece7df] bg-[#f7f5ef]"><FilterVisual category={product.category} compact imageSrc={product.image} /></Link>
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center justify-between gap-4">
           <span className="rounded-full bg-[#fff0f1] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#d51f2a]">{product.category}</span>

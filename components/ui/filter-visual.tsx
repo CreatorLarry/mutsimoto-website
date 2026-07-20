@@ -15,20 +15,22 @@ export function FilterVisual({ category, compact = false, dark = false, imageSrc
   const isFuel = category === "Fuel Filters";
   const lightStage = isAir ? "bg-[#cfe9e3]" : isFuel ? "bg-[#ffe6b8]" : "bg-[#ffd9d4]";
   const hasRenderableImage = Boolean(imageSrc && (imageSrc.startsWith("/") || imageSrc.startsWith("http")));
+  const imagePosition = imageSrc?.includes("front")
+    ? "center 56%"
+    : imageSrc?.includes("side")
+      ? "center 54%"
+      : "center center";
 
   if (hasRenderableImage) {
     return (
-      <div className={cn("filter-stage relative grid h-full min-h-0 w-full overflow-hidden bg-[#f3f0e8]", className)}>
+      <div className={cn("filter-stage relative grid h-full min-h-0 w-full overflow-hidden bg-[#f7f5ef]", className)}>
         <Image
           src={imageSrc as string}
           alt={`${category} product image`}
           fill
           sizes={compact ? "(max-width: 640px) 100vw, 33vw" : "(max-width: 1024px) 100vw, 50vw"}
-          className={cn(
-            compact
-              ? "object-cover object-[center_55%] transition-transform duration-500 group-hover:scale-[1.025]"
-              : "object-contain p-3 sm:p-5",
-          )}
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.015]"
+          style={{ objectPosition: imagePosition }}
         />
       </div>
     );
