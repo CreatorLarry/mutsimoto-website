@@ -3,11 +3,12 @@ import { Building2, Headset, PackageCheck } from "lucide-react";
 import { BranchCard } from "@/components/branches/branch-card";
 import { CallToAction } from "@/components/ui/call-to-action";
 import { PageHero } from "@/components/ui/page-hero";
-import { branches } from "@/data/branches";
+import { getBranches } from "@/lib/branches";
 
 export const metadata: Metadata = { title: "Branches", description: "Find Mutsimoto branch locations, opening hours, phone numbers, and WhatsApp contacts." };
 
-export default function BranchesPage() {
+export default async function BranchesPage() {
+  const branches = await getBranches();
   return (
     <>
       <PageHero eyebrow="Branch network" title="Product support closer to your operation" description="Contact a Mutsimoto branch for product availability, application support, dealer enquiries, and collection arrangements." crumbs={[{ label: "Home", href: "/" }, { label: "Branches" }]} />

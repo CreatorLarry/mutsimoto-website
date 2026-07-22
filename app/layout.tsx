@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
-import { WhatsAppFloat } from "@/components/layout/whatsapp-float";
+import { SiteShell } from "@/components/layout/site-shell";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -49,10 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <WhatsAppFloat />
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

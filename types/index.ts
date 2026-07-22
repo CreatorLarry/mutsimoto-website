@@ -1,8 +1,8 @@
 export type FilterCategory = "Oil Filters" | "Fuel Filters" | "Air Filters";
 
-export type ApplicationType = "Automotive" | "Industrial";
+export type ApplicationType = "Automotive" | "Industrial" | "Both";
 
-export type Availability = "In stock" | "Contact for availability";
+export type Availability = string;
 
 export interface ProductSpecification {
   label: string;
@@ -27,6 +27,10 @@ export interface Product {
   specifications: ProductSpecification[];
   availability: Availability;
   featured?: boolean;
+  publicationStatus?: "draft" | "review" | "published" | "archived";
+  technicalSheetUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export interface Category {
@@ -60,7 +64,9 @@ export interface DownloadResource {
   id: string;
   title: string;
   description: string;
+  category: string;
   type: string;
   fileSize: string;
-  requestUrl: string;
+  actionUrl: string;
+  available: boolean;
 }

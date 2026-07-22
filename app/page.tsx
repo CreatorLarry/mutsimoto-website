@@ -3,7 +3,6 @@ import { ArrowRight, BadgeCheck, BookOpen, Boxes, CheckCircle2, Headset, ShieldC
 import { branches } from "@/data/branches";
 import { applications } from "@/data/applications";
 import { categories } from "@/data/categories";
-import { products } from "@/data/products";
 import { BranchCard } from "@/components/branches/branch-card";
 import { ApplicationCard } from "@/components/products/application-card";
 import { CategoryCard } from "@/components/products/category-card";
@@ -13,9 +12,10 @@ import { CallToAction } from "@/components/ui/call-to-action";
 import { FilterVisual } from "@/components/ui/filter-visual";
 import { SearchBar } from "@/components/ui/search-bar";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { getFeaturedProducts } from "@/lib/products";
 
-export default function Home() {
-  const featuredProducts = products.filter((product) => product.featured).slice(0, 6);
+export default async function Home() {
+  const featuredProducts = await getFeaturedProducts(6);
   const reasons = [
     { icon: ShieldCheck, title: "Reliable filtration", text: "Consistent protection for critical engine and equipment systems.", tone: "bg-[#e52833]" },
     { icon: Boxes, title: "Broad application coverage", text: "One focused range for passenger, fleet, off-highway, and industrial use.", tone: "bg-[#d3962e]" },

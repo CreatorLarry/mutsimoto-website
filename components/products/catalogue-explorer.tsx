@@ -1,12 +1,13 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FilterDrawer } from "@/components/products/filter-drawer";
 import { FilterSidebar, type CatalogueFilters, type FilterOptions } from "@/components/products/filter-sidebar";
 import { ProductCard } from "@/components/products/product-card";
 import { EmptySearchState } from "@/components/ui/empty-state";
 import { SearchBar } from "@/components/ui/search-bar";
+import { LoadingState } from "@/components/ui/loading-state";
 import type { ApplicationType, FilterCategory, Product } from "@/types";
 
 interface CatalogueExplorerProps {
@@ -25,6 +26,7 @@ function unique(values: string[]): string[] {
 
 export function CatalogueExplorer({ products, initialQuery = "", initialCategory = "", initialApplication = "", initialEquipment = "" }: CatalogueExplorerProps) {
   const [query, setQuery] = useState(initialQuery);
+  const [remoteSearch, setRemoteSearch] = useState<{ query: string; products: Product[]; loading: boolean; error: string } | null>(null);
   const [sort, setSort] = useState("part");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<CatalogueFilters>({
@@ -35,15 +37,48 @@ export function CatalogueExplorer({ products, initialQuery = "", initialCategory
     equipment: initialEquipment,
   });
 
+  useEffect(() => {
+    const cleanQuery = query.trim();
+    if (cleanQuery.length < 2) return;
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setRemoteSearch({ query: cleanQuery, products: [], loading: true, error: "" });
+      try {
+        const response = await fetch(`/api/catalogue/search?q=${encodeURIComponent(cleanQuery)}`, { signal: controller.signal });
+        const payload = await response.json() as { products?: Product[]; message?: string };
+        if (!response.ok) throw new Error(payload.message ?? "Search is unavailable.");
+        setRemoteSearch({ query: cleanQuery, products: payload.products ?? [], loading: false, error: "" });
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setRemoteSearch({ query: cleanQuery, products: [], loading: false, error: error instanceof Error ? error.message : "Search is unavailable." });
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [products, query]);
+
+  const cleanQuery = query.trim();
+  const activeRemoteSearch = cleanQuery.length >= 2 && remoteSearch?.query === cleanQuery ? remoteSearch : null;
+  const searchProducts = useMemo(
+    () => cleanQuery.length >= 2 ? activeRemoteSearch?.products ?? [] : products,
+    [activeRemoteSearch, cleanQuery, products],
+  );
+  const searchLoading = cleanQuery.length >= 2 && (!activeRemoteSearch || activeRemoteSearch.loading);
+  const searchError = activeRemoteSearch?.error ?? "";
+
   const options = useMemo<FilterOptions>(() => ({ brands: unique(products.flatMap((product) => product.vehicleBrands)), engines: unique(products.flatMap((product) => product.engineModels)), equipment: unique(products.flatMap((product) => product.equipmentTypes)) }), [products]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    const result = products.filter((product) => {
+    const result = searchProducts.filter((product) => {
       const searchData = [product.name, product.partNumber, product.category, product.shortDescription, ...product.vehicleBrands, ...product.engineModels, ...product.equipmentTypes, ...product.oemNumbers].join(" ").toLowerCase();
-      return (!normalizedQuery || searchData.includes(normalizedQuery))
+      return (!normalizedQuery || normalizedQuery.length >= 2 || searchData.includes(normalizedQuery))
         && (!filters.category || product.category === filters.category)
-        && (!filters.application || product.applicationType === filters.application)
+        && (!filters.application || product.applicationType === filters.application || product.applicationType === "Both")
         && (!filters.brand || product.vehicleBrands.includes(filters.brand))
         && (!filters.engine || product.engineModels.includes(filters.engine))
         && (!filters.equipment || product.equipmentTypes.includes(filters.equipment));
@@ -53,7 +88,7 @@ export function CatalogueExplorer({ products, initialQuery = "", initialCategory
       if (sort === "category") return a.category.localeCompare(b.category) || a.partNumber.localeCompare(b.partNumber);
       return a.partNumber.localeCompare(b.partNumber);
     });
-  }, [filters, products, query, sort]);
+  }, [filters, query, searchProducts, sort]);
 
   function reset() {
     setQuery("");
@@ -69,7 +104,7 @@ export function CatalogueExplorer({ products, initialQuery = "", initialCategory
       </div>
       <div className="mt-7 grid gap-8 lg:grid-cols-[250px_1fr]">
         <FilterSidebar className="hidden rounded-[22px] border border-[#c9dfda] bg-[#eaf4f1] p-5 lg:block" filters={filters} options={options} onChange={setFilters} onReset={reset} />
-        <div>{filteredProducts.length > 0 ? <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div> : <EmptySearchState onReset={reset} />}</div>
+        <div>{searchError && <p className="mb-5 rounded-xl border border-[#f2c5c8] bg-[#fff2f3] px-4 py-3 text-sm text-[#9f1e27]" role="alert">{searchError}</p>}{searchLoading ? <LoadingState /> : filteredProducts.length > 0 ? <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div> : <EmptySearchState onReset={reset} />}</div>
       </div>
       <FilterDrawer open={drawerOpen} filters={filters} options={options} onChange={setFilters} onReset={reset} onClose={() => setDrawerOpen(false)} resultCount={filteredProducts.length} />
     </div>
