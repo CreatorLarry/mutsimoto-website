@@ -8,12 +8,11 @@ const icons: Record<string, LucideIcon> = { passenger: CarFront, commercial: Tru
 export function ApplicationCard({ application }: { application: Application }) {
   const Icon = icons[application.id] ?? Factory;
   const applicationType = ["Industrial", "Construction", "Agriculture", "Power generation"].includes(application.group) ? "Industrial" : "Automotive";
-  const warm = ["commercial", "construction", "generators"].includes(application.id);
   return (
-    <Link href={`/products?application=${applicationType}&equipment=${encodeURIComponent(application.equipmentTypes[0])}`} className={`group flex min-h-52 flex-col rounded-[22px] border p-6 shadow-[0_6px_24px_rgba(7,23,43,0.035)] transition-all hover:-translate-y-1 hover:shadow-[0_16px_38px_rgba(7,23,43,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e52833] ${warm ? "border-[#f0dfc1] bg-[#fffaf0] hover:border-[#e5a93f]" : "border-[#cfe3df] bg-[#f7fcfb] hover:border-[#2f8178]"}`}>
-      <div className="flex items-start justify-between"><span className={`grid size-12 place-items-center rounded-2xl transition-all group-hover:bg-[#07172b] group-hover:text-white ${warm ? "bg-[#f9e8c8] text-[#9b6515]" : "bg-[#dceeea] text-[#246e66]"}`}><Icon className="size-5" /></span><ArrowUpRight className="size-5 text-[#a0aab6] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#e52833]" /></div>
-      <h3 className="mt-6 text-lg font-extrabold tracking-[-0.02em] text-[#07172b]">{application.name}</h3>
-      <p className="mt-2 text-sm leading-6 text-[#526176]">{application.description}</p>
+    <Link href={`/products?application=${applicationType}&equipment=${encodeURIComponent(application.equipmentTypes[0])}`} className="group flex min-h-52 flex-col rounded-lg border border-[#353d43] bg-[#171c20] p-6 shadow-[0_10px_28px_rgba(0,0,0,0.24)] transition-all hover:-translate-y-1 hover:border-[#697177] hover:bg-[#1d2327] hover:shadow-[0_18px_42px_rgba(0,0,0,0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ef3340]">
+      <div className="flex items-start justify-between"><span className="grid size-12 place-items-center rounded-md border border-[#535b61] bg-[#232a30] text-[#ef3340] transition-all group-hover:border-[#ef3340] group-hover:bg-[#ef3340] group-hover:text-white"><Icon className="size-5" /></span><ArrowUpRight className="size-5 text-[#8f979c] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#ef3340]" /></div>
+      <h3 className="mt-6 text-lg font-extrabold uppercase tracking-[-0.015em] text-white">{application.name}</h3>
+      <p className="mt-2 text-sm leading-6 text-[#b9bec2]">{application.description}</p>
     </Link>
   );
 }
