@@ -1,4 +1,5 @@
 import type { AdminAboutPageContent, LeadershipProfile } from "@/types/company-content";
+import { LeadershipImageInput } from "@/components/admin/leadership-image-input";
 
 const fieldClass = "mt-2 h-11 w-full rounded-xl border border-[#d9e1e9] bg-white px-3 text-sm text-[#26364b] outline-none transition focus:border-[#e52833] focus:ring-2 focus:ring-[#e52833]/10";
 const textAreaClass = "mt-2 min-h-28 w-full resize-y rounded-xl border border-[#d9e1e9] bg-white px-3 py-3 text-sm leading-6 text-[#26364b] outline-none transition focus:border-[#e52833] focus:ring-2 focus:ring-[#e52833]/10";
@@ -30,6 +31,10 @@ export function LeadershipForm({ action, leader, compact = false }: LeadershipFo
       {leader && <input type="hidden" name="leadershipId" value={leader.id} />}
       <label className={labelClass}>Full name<input name="fullName" defaultValue={leader?.fullName} required maxLength={160} placeholder="Leader's full name" className={fieldClass} /></label>
       <label className={labelClass}>Position / title<input name="leadershipTitle" defaultValue={leader?.title} required maxLength={160} placeholder="e.g. Chief Executive Officer" className={fieldClass} /></label>
+      <LeadershipImageInput
+        currentImageUrl={leader?.photoUrl}
+        leaderName={leader?.fullName}
+      />
       <label className={`${labelClass} sm:col-span-2`}>Biography<textarea name="biography" defaultValue={leader?.biography} required maxLength={5000} placeholder="Professional background, company role, and relevant experience." className={`${textAreaClass} min-h-36`} /></label>
       <label className={`${labelClass} sm:col-span-2`}>Leadership message<textarea name="message" defaultValue={leader?.message ?? ""} maxLength={3000} placeholder="Optional message to customers, partners, and the Mutsimoto team." className={textAreaClass} /></label>
       <label className={labelClass}>Display order<input name="displayOrder" type="number" min={0} max={1000} defaultValue={leader?.displayOrder ?? 0} className={fieldClass} /></label>

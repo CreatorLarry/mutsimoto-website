@@ -28,9 +28,11 @@ test("ships product-specific content and removes the starter preview", async () 
   ]);
 
   assert.match(home, /Filtration Solutions Built for Performance/);
-  assert.match(categoryData, /Oil Filters/);
-  assert.match(categoryData, /Fuel Filters/);
-  assert.match(categoryData, /Air Filters/);
+  assert.match(categoryData, /Oil Element/);
+  assert.match(categoryData, /Oil Spin On/);
+  assert.match(categoryData, /Fuel Elements/);
+  assert.match(categoryData, /Fuel Spin On/);
+  assert.match(categoryData, /Air Cleaners/);
   assert.match(layout, /Mutsimoto Motor Company/);
   assert.doesNotMatch(home, /Your site is taking shape|SkeletonPreview/);
 
@@ -57,6 +59,7 @@ test("includes the protected dashboard and Supabase handoff", async () => {
     "proxy.ts",
     "supabase/migrations/202607200001_core_schema.sql",
     "supabase/migrations/202607200002_security_storage.sql",
+    "supabase/migrations/202607230001_product_categories.sql",
     "supabase/seed.sql",
   ];
   await Promise.all(requiredFiles.map((file) => access(new URL(file, root))));

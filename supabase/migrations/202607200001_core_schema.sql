@@ -10,7 +10,13 @@ create type public.staff_role as enum (
   'viewer'
 );
 
-create type public.product_category as enum ('oil', 'fuel', 'air');
+create type public.product_category as enum (
+  'oil_element',
+  'oil_spin_on',
+  'fuel_elements',
+  'fuel_spin_on',
+  'air_cleaners'
+);
 create type public.application_type as enum ('automotive', 'industrial', 'both');
 create type public.publication_status as enum ('draft', 'review', 'published', 'archived');
 create type public.reference_type as enum ('oem', 'competitor', 'alternative');

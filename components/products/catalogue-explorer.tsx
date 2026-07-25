@@ -9,6 +9,7 @@ import { EmptySearchState } from "@/components/ui/empty-state";
 import { SearchBar } from "@/components/ui/search-bar";
 import { LoadingState } from "@/components/ui/loading-state";
 import type { ApplicationType, FilterCategory, Product } from "@/types";
+import { productCategoryOptions } from "@/types/categories";
 
 interface CatalogueExplorerProps {
   products: Product[];
@@ -30,7 +31,7 @@ export function CatalogueExplorer({ products, initialQuery = "", initialCategory
   const [sort, setSort] = useState("part");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<CatalogueFilters>({
-    category: (["Oil Filters", "Fuel Filters", "Air Filters"].includes(initialCategory) ? initialCategory : "") as FilterCategory | "",
+    category: (productCategoryOptions.some((option) => option.label === initialCategory) ? initialCategory : "") as FilterCategory | "",
     application: (["Automotive", "Industrial"].includes(initialApplication) ? initialApplication : "") as ApplicationType | "",
     brand: "",
     engine: "",

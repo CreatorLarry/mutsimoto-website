@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { SiteShell } from "@/components/layout/site-shell";
+import { RealtimeCatalogueRefresh } from "@/components/realtime-catalogue-refresh";
 import "./globals.css";
+
+const themeScript = `
+  (() => {
+    try {
+      const savedTheme = localStorage.getItem("mutsimoto-theme");
+      const systemTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      const theme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : systemTheme;
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    } catch {
+      document.documentElement.dataset.theme = "dark";
+    }
+  })();
+`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -45,8 +60,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      data-theme="dark"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
+        <RealtimeCatalogueRefresh />
         <SiteShell>{children}</SiteShell>
       </body>
     </html>

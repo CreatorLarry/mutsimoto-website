@@ -1,13 +1,14 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { normalizeProductCategoryKey } from "@/types/categories";
 import type { AdminProductFormValues, AdminProductListItem } from "@/types/product-admin";
 
 interface ProductListRecord {
   id: string;
   name: string;
   part_number: string;
-  category: AdminProductListItem["category"];
+  category: string;
   publication_status: AdminProductListItem["publicationStatus"];
   availability: string;
   featured: boolean;
@@ -36,7 +37,7 @@ interface ProductDetailRecord {
   name: string;
   slug: string;
   part_number: string;
-  category: AdminProductFormValues["category"];
+  category: string;
   short_description: string;
   full_description: string;
   application_type: AdminProductFormValues["applicationType"];
@@ -72,7 +73,7 @@ export async function getAdminProducts(options: { query?: string; status?: strin
     id: product.id,
     name: product.name,
     partNumber: product.part_number,
-    category: product.category,
+    category: normalizeProductCategoryKey(product.category),
     publicationStatus: product.publication_status,
     availability: product.availability,
     featured: product.featured,
@@ -114,7 +115,7 @@ export async function getAdminProduct(id: string): Promise<AdminProductFormValue
     name: product.name,
     slug: product.slug,
     partNumber: product.part_number,
-    category: product.category,
+    category: normalizeProductCategoryKey(product.category),
     shortDescription: product.short_description,
     fullDescription: product.full_description,
     applicationType: product.application_type,
@@ -131,4 +132,3 @@ export async function getAdminProduct(id: string): Promise<AdminProductFormValue
     primaryImagePath: product.primary_image_url ?? primaryImage?.storage_path ?? null,
   };
 }
-

@@ -1,4 +1,6 @@
-export type FilterCategory = "Oil Filters" | "Fuel Filters" | "Air Filters";
+import type { FilterCategory } from "@/types/categories";
+
+export type { FilterCategory, ProductCategoryKey } from "@/types/categories";
 
 export type ApplicationType = "Automotive" | "Industrial" | "Both";
 

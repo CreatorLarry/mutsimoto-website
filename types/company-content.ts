@@ -32,6 +32,8 @@ export interface LeadershipProfile {
   title: string;
   biography: string;
   message: string | null;
+  photoStoragePath: string | null;
+  photoUrl: string | null;
   displayOrder: number;
   published: boolean;
   updatedAt: string;

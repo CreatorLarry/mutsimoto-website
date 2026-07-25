@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, BookOpen, Boxes, CheckCircle2, Headset, ShieldCheck, Warehouse } from "lucide-react";
+import { FilterBrandStrip } from "@/components/brands/filter-brand-strip";
 import { branches } from "@/data/branches";
 import { applications } from "@/data/applications";
 import { categories } from "@/data/categories";
@@ -9,7 +10,7 @@ import { CategoryCard } from "@/components/products/category-card";
 import { ProductCard } from "@/components/products/product-card";
 import { ButtonLink } from "@/components/ui/button-link";
 import { CallToAction } from "@/components/ui/call-to-action";
-import { FilterVisual } from "@/components/ui/filter-visual";
+import { FilterShowcase } from "@/components/hero/filter-showcase";
 import { SearchBar } from "@/components/ui/search-bar";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getFeaturedProducts } from "@/lib/products";
@@ -25,25 +26,20 @@ export default async function Home() {
 
   return (
     <>
-      <section className="blueprint-grid-dark relative overflow-hidden border-b border-[#353d43] bg-[radial-gradient(circle_at_15%_28%,rgba(239,51,64,0.11),transparent_25%),linear-gradient(118deg,#0a0d0f_0%,#171c20_56%,#0d1114_100%)]">
+      <section className="blueprint-grid-dark dark-panel relative overflow-hidden border-b border-[#353d43] bg-[radial-gradient(circle_at_15%_28%,rgba(239,51,64,0.11),transparent_25%),linear-gradient(118deg,#0a0d0f_0%,#171c20_56%,#0d1114_100%)]">
         <div className="absolute -left-32 top-24 size-72 rotate-45 rounded-none border-[42px] border-white/[0.025]" aria-hidden="true" />
         <div className="absolute right-[42%] top-20 size-3 rounded-none bg-[#ef3340] shadow-[0_0_0_10px_rgba(239,51,64,0.1)]" aria-hidden="true" />
         <div className="relative mx-auto grid min-h-[690px] max-w-7xl items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1.03fr_0.97fr] lg:px-10 lg:py-20">
           <div>
             <p className="inline-flex items-center gap-2 border-l-2 border-[#ef3340] bg-[#1a2025] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#f4f5f5] shadow-sm"><span className="size-2 rounded-none bg-[#ef3340]" /> Automotive &amp; industrial filtration</p>
             <h1 className="mt-7 max-w-3xl text-5xl font-black uppercase leading-[0.95] tracking-[-0.055em] text-white sm:text-6xl lg:text-[72px]">Filtration Solutions Built for Performance</h1>
-            <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-[#c9cdd0]">Oil, fuel, and air filters engineered around the vehicles, machinery, and power systems that keep your operation moving.</p>
+            <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-[#c9cdd0]">Oil, fuel, and air filters—plus custom filters and complete filtration solutions—engineered around the vehicles, machinery, and power systems that keep your operation moving.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row"><ButtonLink href="/products">Explore products <ArrowRight className="size-4" /></ButtonLink><ButtonLink href="/downloads" variant="outline"><BookOpen className="size-4" /> View catalogues</ButtonLink></div>
             <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 text-xs font-semibold uppercase tracking-[0.05em] text-[#b9bec2]">{["12+ prototype references", "OEM cross-reference", "Technical support"].map((item) => <span key={item} className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#ef3340]" />{item}</span>)}</div>
           </div>
 
-          <div className="relative">
-            <div className="brushed-metal overflow-hidden rounded-lg border border-[#535b61] bg-[#0d1114] p-3 shadow-[0_30px_80px_rgba(0,0,0,0.48)]">
-              <div className="h-[470px] overflow-hidden rounded-md"><FilterVisual category="Oil Filters" dark /></div>
-              <div className="flex items-center justify-between px-4 py-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#aeb4b8]"><span>MF Series / Engine oil</span><span className="inline-flex items-center gap-2 text-white"><span className="size-2 rounded-none bg-[#ef3340]" /> Application ready</span></div>
-            </div>
-            <div className="absolute -left-4 top-9 rounded-md border border-[#535b61] border-l-[3px] border-l-[#ef3340] bg-[#171c20] px-4 py-3 shadow-[0_14px_35px_rgba(0,0,0,0.38)] sm:-left-8"><p className="text-[9px] font-extrabold uppercase tracking-[0.13em] text-[#aeb4b8]">Product focus</p><p className="mt-1 text-sm font-extrabold uppercase text-white">Oil · Fuel · Air</p></div>
-            <div className="absolute -bottom-5 right-5 rounded-md border border-[#ef3340] bg-[#14191d] px-5 py-4 text-white shadow-[0_14px_35px_rgba(0,0,0,0.4)]"><p className="text-[9px] font-bold uppercase tracking-[0.13em] text-[#ef3340]">Coverage</p><p className="mt-1 text-sm font-extrabold uppercase text-white">Auto + Industrial</p></div>
+          <div className="relative lg:-mr-5">
+            <FilterShowcase />
           </div>
         </div>
         <div className="relative mx-auto max-w-7xl px-5 pb-10 sm:px-8 lg:px-10">
@@ -51,13 +47,15 @@ export default async function Home() {
         </div>
       </section>
 
+      <FilterBrandStrip />
+
       <section className="border-y border-[#353d43] bg-[#0d1114]"><div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-5 py-8 sm:px-8 md:grid-cols-4 lg:px-10">{[
         ["01", "Automotive range", "bg-[#14191d]"], ["02", "Industrial coverage", "bg-[#171c20]"], ["03", "OEM references", "bg-[#14191d]"], ["04", "Technical support", "bg-[#171c20]"],
       ].map(([number, label, tone]) => <div key={number} className={`rounded-md border border-[#353d43] ${tone} px-4 py-5`}><span className="font-mono text-[10px] font-bold text-[#ef3340]">{number}</span><p className="mt-2 text-xs font-bold uppercase tracking-[0.05em] text-[#c9cdd0]">{label}</p></div>)}</div></section>
 
       <section className="mx-auto my-8 max-w-7xl rounded-lg border border-[#353d43] bg-[#11161a] px-5 py-20 shadow-[0_18px_48px_rgba(0,0,0,0.22)] sm:px-8 lg:px-10 lg:py-28">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><SectionHeading eyebrow="Focused product range" title="Three systems. One dependable filtration partner." description="A specialist catalogue designed to make product discovery and application matching faster." /><p className="max-w-sm text-sm font-medium leading-7 text-[#aeb4b8]">Purpose-built for workshops, dealers, fleet managers, and industrial maintenance teams.</p></div>
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">{categories.map((category) => <CategoryCard key={category.id} category={category} />)}</div>
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between"><SectionHeading eyebrow="Focused product range" title="Five filter categories. One dependable filtration partner." description="A specialist catalogue designed to make product discovery and application matching faster." /><p className="max-w-sm text-sm font-medium leading-7 text-[#aeb4b8]">Purpose-built for workshops, dealers, fleet managers, and industrial maintenance teams.</p></div>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 xl:grid-cols-5">{categories.map((category) => <CategoryCard key={category.id} category={category} />)}</div>
       </section>
 
       <section className="border-y border-[#353d43] bg-[#0d1114]"><div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10 lg:py-28"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><SectionHeading eyebrow="Browse by application" title="Start with the equipment you service" description="Choose an application, then narrow results by make, engine, equipment, or existing reference." /><ButtonLink href="/applications" variant="outline">All applications <ArrowRight className="size-4" /></ButtonLink></div><div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{applications.map((application) => <ApplicationCard key={application.id} application={application} />)}</div></div></section>

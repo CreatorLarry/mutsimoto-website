@@ -2,11 +2,12 @@ import "server-only";
 
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { getLeadershipImageUrl } from "@/lib/leadership-images";
 import type { AboutPageContent, LeadershipProfile } from "@/types/company-content";
 
 interface ContentSection { key?: unknown; title?: unknown; body?: unknown }
 interface AboutPageRecord { eyebrow: string | null; title: string; summary: string | null; sections: unknown }
-interface LeadershipRecord { id: string; full_name: string; title: string; biography: string; message: string | null; display_order: number; published: boolean; updated_at: string }
+interface LeadershipRecord { id: string; full_name: string; title: string; biography: string; message: string | null; photo_storage_path: string | null; display_order: number; published: boolean; updated_at: string }
 
 export const defaultAboutContent: AboutPageContent = {
   eyebrow: "About Mutsimoto",
@@ -66,8 +67,19 @@ export function mapAboutRecord(record: AboutPageRecord): AboutPageContent {
   };
 }
 
-function mapLeadership(record: LeadershipRecord): LeadershipProfile {
-  return { id: record.id, fullName: record.full_name, title: record.title, biography: record.biography, message: record.message, displayOrder: record.display_order, published: record.published, updatedAt: record.updated_at };
+async function mapLeadership(record: LeadershipRecord): Promise<LeadershipProfile> {
+  return {
+    id: record.id,
+    fullName: record.full_name,
+    title: record.title,
+    biography: record.biography,
+    message: record.message,
+    photoStoragePath: record.photo_storage_path,
+    photoUrl: await getLeadershipImageUrl(record.photo_storage_path),
+    displayOrder: record.display_order,
+    published: record.published,
+    updatedAt: record.updated_at,
+  };
 }
 
 export async function getPublicCompanyContent(): Promise<{ about: AboutPageContent; leadership: LeadershipProfile[] }> {
@@ -75,12 +87,16 @@ export async function getPublicCompanyContent(): Promise<{ about: AboutPageConte
   const supabase = await createClient();
   const [aboutResult, leadershipResult] = await Promise.all([
     supabase.from("content_pages").select("eyebrow, title, summary, sections").eq("slug", "about").eq("publication_status", "published").maybeSingle(),
-    supabase.from("leadership_profiles").select("id, full_name, title, biography, message, display_order, published, updated_at").eq("published", true).order("display_order"),
+    supabase.from("leadership_profiles").select("id, full_name, title, biography, message, photo_storage_path, display_order, published, updated_at").eq("published", true).order("display_order"),
   ]);
   if (aboutResult.error) console.error("[company:about]", { code: aboutResult.error.code, message: aboutResult.error.message });
   if (leadershipResult.error) console.error("[company:leadership]", { code: leadershipResult.error.code, message: leadershipResult.error.message });
   return {
     about: aboutResult.data ? mapAboutRecord(aboutResult.data as AboutPageRecord) : defaultAboutContent,
-    leadership: leadershipResult.error ? [] : ((leadershipResult.data ?? []) as LeadershipRecord[]).map(mapLeadership),
+    leadership: leadershipResult.error
+      ? []
+      : await Promise.all(
+          ((leadershipResult.data ?? []) as LeadershipRecord[]).map(mapLeadership),
+        ),
   };
 }

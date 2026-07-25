@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/ui/brand-mark";
 
-const productLinks = ["Oil Filters", "Fuel Filters", "Air Filters"];
+const productLinks = ["Oil Element", "Oil Spin On", "Fuel Elements", "Fuel Spin On", "Air Cleaners"];
 const companyLinks = [{ label: "About Us", href: "/about" }, { label: "Applications", href: "/applications" }, { label: "Downloads", href: "/downloads" }, { label: "Contact", href: "/contact" }];
 
 export function Footer() {

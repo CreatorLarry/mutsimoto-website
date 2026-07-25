@@ -15,9 +15,16 @@ Run the SQL files in this order using the Supabase SQL editor:
 
 1. `migrations/202607200001_core_schema.sql`
 2. `migrations/202607200002_security_storage.sql`
-3. `seed.sql`
+3. `migrations/202607230001_product_categories.sql`
+4. `migrations/202607240001_catalogue_integration.sql`
+5. `migrations/202607250001_leadership_images.sql`
+6. `seed.sql`
 
 The seed is repeatable and provides twelve clearly marked demo products plus the four branch records. Product fitment and technical values must be reviewed before production use.
+
+For an existing demo database that already contains the twelve original products, run only `migrations/202607240001_catalogue_integration.sql`. It upgrades the product categories without removing products and enables live public catalogue refresh events.
+
+Run `migrations/202607250001_leadership_images.sql` on an existing connected database to add staff and public-read policies for leadership portrait uploads. The application also creates signed portrait URLs server-side.
 
 ## 3. Configure the website
 

@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { productCategoryKeys } from "@/types/categories";
 
-export const productCategories = ["oil", "fuel", "air"] as const;
+export const productCategories = productCategoryKeys;
 export const productApplicationTypes = ["automotive", "industrial", "both"] as const;
 export const productPublicationStatuses = ["draft", "review", "published", "archived"] as const;
 
@@ -9,8 +10,16 @@ export const productFormSchema = z.object({
   slug: z.string().trim().min(2).max(180).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens."),
   partNumber: z.string().trim().min(2).max(100),
   category: z.enum(productCategories),
-  shortDescription: z.string().trim().min(10).max(320),
-  fullDescription: z.string().trim().min(20).max(5000),
+  shortDescription: z
+    .string()
+    .trim()
+    .max(320)
+    .refine((value) => value.length === 0 || value.length >= 10, "Use at least 10 characters, or leave the short description blank."),
+  fullDescription: z
+    .string()
+    .trim()
+    .max(5000)
+    .refine((value) => value.length === 0 || value.length >= 20, "Use at least 20 characters, or leave the full description blank."),
   applicationType: z.enum(productApplicationTypes),
   availability: z.string().trim().min(2).max(100),
   featured: z.boolean(),
@@ -126,4 +135,3 @@ export function productFormData(formData: FormData): ProductFormInput {
     intent: formData.get("intent"),
   });
 }
-

@@ -499,6 +499,7 @@ for delete to authenticated using ((select private.is_super_admin()));
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
   ('product-images', 'product-images', false, 5242880, array['image/jpeg', 'image/png', 'image/webp']),
+  ('leadership-images', 'leadership-images', false, 5242880, array['image/jpeg', 'image/png', 'image/webp']),
   ('technical-sheets', 'technical-sheets', false, 15728640, array['application/pdf']),
   ('catalogues', 'catalogues', true, 26214400, array['application/pdf'])
 on conflict (id) do update set
@@ -509,7 +510,7 @@ on conflict (id) do update set
 create policy storage_staff_read on storage.objects
 for select to authenticated
 using (
-  bucket_id in ('product-images', 'technical-sheets', 'catalogues')
+  bucket_id in ('product-images', 'leadership-images', 'technical-sheets', 'catalogues')
   and (select private.is_active_staff())
 );
 
@@ -535,6 +536,18 @@ using (
     from public.products p
     where p.technical_sheet_url = name
       and p.publication_status = 'published'
+  )
+);
+
+create policy storage_published_leadership_images_read on storage.objects
+for select to anon, authenticated
+using (
+  bucket_id = 'leadership-images'
+  and exists (
+    select 1
+    from public.leadership_profiles leadership
+    where leadership.photo_storage_path = name
+      and leadership.published = true
   )
 );
 
@@ -566,25 +579,25 @@ using (
 create policy storage_content_insert on storage.objects
 for insert to authenticated
 with check (
-  bucket_id = 'catalogues'
+  bucket_id in ('catalogues', 'leadership-images')
   and (select private.can_manage_content())
 );
 
 create policy storage_content_update on storage.objects
 for update to authenticated
 using (
-  bucket_id = 'catalogues'
+  bucket_id in ('catalogues', 'leadership-images')
   and (select private.can_manage_content())
 )
 with check (
-  bucket_id = 'catalogues'
+  bucket_id in ('catalogues', 'leadership-images')
   and (select private.can_manage_content())
 );
 
 create policy storage_content_delete on storage.objects
 for delete to authenticated
 using (
-  bucket_id = 'catalogues'
+  bucket_id in ('catalogues', 'leadership-images')
   and (select private.can_manage_content())
 );
 

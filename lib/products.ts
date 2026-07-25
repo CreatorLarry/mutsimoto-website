@@ -3,7 +3,8 @@ import "server-only";
 import { products as mockProducts } from "@/data/products";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import type { ApplicationType, FilterCategory, Product } from "@/types";
+import { normalizeProductCategoryKey, productCategoryLabels } from "@/types/categories";
+import type { ApplicationType, Product } from "@/types";
 
 interface ProductImageRecord {
   storage_path: string;
@@ -40,7 +41,7 @@ interface ProductRecord {
   slug: string;
   name: string;
   part_number: string;
-  category: "oil" | "fuel" | "air";
+  category: string;
   short_description: string;
   full_description: string;
   application_type: "automotive" | "industrial" | "both";
@@ -75,12 +76,6 @@ const publicProductSelect = `
     engine_models(model)
   )
 `;
-
-const categoryLabels: Record<ProductRecord["category"], FilterCategory> = {
-  oil: "Oil Filters",
-  fuel: "Fuel Filters",
-  air: "Air Filters",
-};
 
 const applicationLabels: Record<ProductRecord["application_type"], ApplicationType> = {
   automotive: "Automotive",
@@ -117,7 +112,8 @@ async function mapProductRecords(records: ProductRecord[]): Promise<Product[]> {
   ]);
 
   return records.map((record) => {
-    const fallbackImage = `${record.category}-filter`;
+    const categoryKey = normalizeProductCategoryKey(record.category);
+    const fallbackImage = `${categoryKey}-filter`;
     const orderedImages = [...(record.product_images ?? [])].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order);
     const imageUrls = orderedImages.map((image) => directOrSigned(image.storage_path, signedImages, fallbackImage));
     const vehicleBrands = [...new Set((record.product_vehicle_applications ?? []).map((application) => application.vehicle_models?.vehicle_brands?.name).filter((value): value is string => Boolean(value)))];
@@ -133,7 +129,7 @@ async function mapProductRecords(records: ProductRecord[]): Promise<Product[]> {
       slug: record.slug,
       name: record.name,
       partNumber: record.part_number,
-      category: categoryLabels[record.category],
+      category: productCategoryLabels[categoryKey],
       shortDescription: record.short_description,
       description: record.full_description,
       applicationType: applicationLabels[record.application_type],

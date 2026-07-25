@@ -9,7 +9,7 @@ interface PageHeroProps {
 
 export function PageHero({ eyebrow, title, description, crumbs }: PageHeroProps) {
   return (
-    <section className="blueprint-grid-dark relative overflow-hidden border-b border-[#353d43] bg-[#11161a]">
+    <section className="page-hero blueprint-grid-dark relative overflow-hidden border-b border-[#353d43] bg-[#11161a]">
       <div className="absolute -right-28 -top-28 size-80 rotate-12 rounded-none border-[42px] border-white/[0.025]" aria-hidden="true" />
       <div className="absolute right-[18%] top-14 size-3 rounded-none bg-[#ef3340] shadow-[0_0_0_9px_rgba(239,51,64,0.1)]" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:px-10 lg:py-20">

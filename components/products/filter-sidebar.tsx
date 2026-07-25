@@ -2,6 +2,7 @@
 
 import { RotateCcw } from "lucide-react";
 import type { ApplicationType, FilterCategory } from "@/types";
+import { productCategoryOptions } from "@/types/categories";
 
 export interface CatalogueFilters {
   category: FilterCategory | "";
@@ -37,7 +38,7 @@ export function FilterSidebar({ filters, options, onChange, onReset, className }
       <div className="flex items-center justify-between border-b border-[#353d43] pb-4"><h2 className="text-lg font-extrabold uppercase text-white">Filter products</h2><button type="button" onClick={onReset} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold text-[#aeb4b8] hover:bg-[#232a30] hover:text-[#ef3340]"><RotateCcw className="size-3.5" /> Reset</button></div>
       <div className="space-y-5 pt-5">
         <label className="block text-[11px] font-extrabold uppercase tracking-[0.06em] text-[#c9cdd0]">Product category
-          <select className={selectClass} value={filters.category} onChange={(event) => update("category", event.target.value as CatalogueFilters["category"])}><option value="">All categories</option><option>Oil Filters</option><option>Fuel Filters</option><option>Air Filters</option></select>
+          <select className={selectClass} value={filters.category} onChange={(event) => update("category", event.target.value as CatalogueFilters["category"])}><option value="">All categories</option>{productCategoryOptions.map((option) => <option key={option.value} value={option.label}>{option.label}</option>)}</select>
         </label>
         <label className="block text-[11px] font-extrabold uppercase tracking-[0.06em] text-[#c9cdd0]">Application
           <select className={selectClass} value={filters.application} onChange={(event) => update("application", event.target.value as CatalogueFilters["application"])}><option value="">All applications</option><option>Automotive</option><option>Industrial</option></select>

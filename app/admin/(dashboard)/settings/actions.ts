@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ZodError } from "zod";
 import { requireStaff } from "@/lib/auth/session";
+import {
+  leadershipImageBucket,
+  leadershipImageMaxSize,
+  leadershipImagePath,
+  leadershipImageTypes,
+} from "@/lib/leadership-images";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   aboutContentFormData,
@@ -55,16 +62,80 @@ async function saveAboutContent(input: AboutContentInput, staffId: string) {
   if (error) throw new Error("The About page content could not be created.");
 }
 
-async function saveLeadership(input: LeadershipInput) {
+function leadershipPhotoFrom(formData: FormData): File | null {
+  const value = formData.get("leadershipPhoto");
+  if (!(value instanceof File) || value.size === 0) return null;
+  if (!leadershipImageTypes.has(value.type)) {
+    throw new Error("Choose a JPEG, PNG, or WebP leadership portrait.");
+  }
+  if (value.size > leadershipImageMaxSize) {
+    throw new Error("The leadership portrait must be 5 MB or smaller.");
+  }
+  return value;
+}
+
+async function uploadLeadershipPhoto(leadershipId: string, photo: File): Promise<string> {
+  const storagePath = leadershipImagePath(leadershipId);
+  const admin = createAdminClient();
+  const { error } = await admin.storage
+    .from(leadershipImageBucket)
+    .upload(storagePath, await photo.arrayBuffer(), {
+      contentType: photo.type,
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+  if (error) throw new Error("The leadership portrait could not be uploaded.");
+  return storagePath;
+}
+
+async function removeLeadershipPhoto(storagePath: string | null): Promise<void> {
+  if (!storagePath) return;
+  const admin = createAdminClient();
+  const { error } = await admin.storage.from(leadershipImageBucket).remove([storagePath]);
+  if (error) {
+    console.error("[leadership:image-remove]", { message: error.message });
+  }
+}
+
+async function saveLeadership(
+  input: LeadershipInput,
+  photo: File | null,
+  removePhoto: boolean,
+) {
   const supabase = await createClient();
-  const payload = { full_name: input.fullName, title: input.title, biography: input.biography, message: input.message || null, display_order: input.displayOrder, published: input.published };
+  const leadershipId = input.leadershipId ?? crypto.randomUUID();
+  const uploadedPath = photo ? await uploadLeadershipPhoto(leadershipId, photo) : undefined;
+  const payload = {
+    full_name: input.fullName,
+    title: input.title,
+    biography: input.biography,
+    message: input.message || null,
+    display_order: input.displayOrder,
+    published: input.published,
+    ...(uploadedPath !== undefined
+      ? { photo_storage_path: uploadedPath }
+      : removePhoto
+        ? { photo_storage_path: null }
+        : {}),
+  };
+
   if (input.leadershipId) {
     const { error } = await supabase.from("leadership_profiles").update(payload).eq("id", input.leadershipId);
     if (error) throw new Error("The leadership profile could not be updated.");
+    if (removePhoto && !uploadedPath) {
+      await removeLeadershipPhoto(leadershipImagePath(input.leadershipId));
+    }
     return;
   }
-  const { error } = await supabase.from("leadership_profiles").insert(payload);
-  if (error) throw new Error("The leadership profile could not be created.");
+
+  const { error } = await supabase
+    .from("leadership_profiles")
+    .insert({ id: leadershipId, ...payload });
+  if (error) {
+    if (uploadedPath) await removeLeadershipPhoto(uploadedPath);
+    throw new Error("The leadership profile could not be created.");
+  }
 }
 
 export async function updateAboutContent(formData: FormData): Promise<void> {
@@ -83,7 +154,9 @@ export async function createOrUpdateLeadership(formData: FormData): Promise<void
   let input: LeadershipInput;
   try {
     input = leadershipFormData(formData);
-    await saveLeadership(input);
+    const photo = leadershipPhotoFrom(formData);
+    const removePhoto = formData.get("removeLeadershipPhoto") === "on" && !photo;
+    await saveLeadership(input, photo, removePhoto);
   } catch (error) {
     actionRedirect(readableError(error));
   }
@@ -108,8 +181,14 @@ export async function deleteLeadership(formData: FormData): Promise<void> {
   const parsed = leadershipDeleteSchema.safeParse({ leadershipId: formData.get("leadershipId") });
   if (!parsed.success) actionRedirect("The leadership removal request was invalid.");
   const supabase = await createClient();
+  const { data: leadership } = await supabase
+    .from("leadership_profiles")
+    .select("photo_storage_path")
+    .eq("id", parsed.data.leadershipId)
+    .maybeSingle();
   const { error } = await supabase.from("leadership_profiles").delete().eq("id", parsed.data.leadershipId);
   if (error) actionRedirect("The leadership profile could not be deleted.");
+  await removeLeadershipPhoto(leadership?.photo_storage_path ?? null);
   revalidateCompanyViews();
   actionRedirect("Leadership profile permanently deleted.");
 }

@@ -6,6 +6,8 @@ import { ZodError } from "zod";
 import { hasPermission } from "@/lib/auth/permissions";
 import { requireStaff } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { databaseWriteError } from "@/lib/supabase/errors";
+import { productCategoryLabels } from "@/types/categories";
 import {
   parseEquipmentApplications,
   parseReferences,
@@ -38,6 +40,20 @@ function slugify(value: string): string {
 function publicationStatus(input: ProductFormInput): "draft" | "review" | "published" {
   if (input.intent === "publish") return "published";
   return input.intent;
+}
+
+function catalogueDescriptions(input: ProductFormInput) {
+  const application =
+    input.applicationType === "both"
+      ? "automotive and industrial applications"
+      : `${input.applicationType} applications`;
+  const automaticShortDescription = `${input.name} (${input.partNumber}) is a Mutsimoto ${productCategoryLabels[input.category]} for ${application}.`;
+  const shortDescription = input.shortDescription || automaticShortDescription;
+  const fullDescription =
+    input.fullDescription ||
+    `${input.shortDescription || automaticShortDescription} Contact Mutsimoto Motor Company to confirm fitment, technical specifications, and cross-reference compatibility before installation.`;
+
+  return { shortDescription, fullDescription };
 }
 
 async function replaceSpecifications(client: StaffSupabaseClient, productId: string, values: ParsedSpecification[]) {
@@ -155,13 +171,14 @@ export async function createProduct(formData: FormData): Promise<void> {
 
   const client = await createClient();
   const status = publicationStatus(input);
+  const descriptions = catalogueDescriptions(input);
   const { data, error } = await client.from("products").insert({
     name: input.name,
     slug: input.slug,
     part_number: input.partNumber,
     category: input.category,
-    short_description: input.shortDescription,
-    full_description: input.fullDescription,
+    short_description: descriptions.shortDescription,
+    full_description: descriptions.fullDescription,
     application_type: input.applicationType,
     availability: input.availability,
     featured: input.featured,
@@ -174,13 +191,26 @@ export async function createProduct(formData: FormData): Promise<void> {
   }).select("id").single();
 
   if (error || !data) {
-    actionRedirect("/admin/products/new", error?.code === "23505" ? "That slug or part number already exists." : "The product could not be created.");
+    actionRedirect(
+      "/admin/products/new",
+      error?.code === "23505"
+        ? "That slug or part number already exists."
+        : databaseWriteError(error, "The product could not be created. Check the database connection and try again."),
+    );
   }
 
   try {
     await saveRelatedData(client, String(data.id), input);
     const image = formData.get("primaryImage");
-    if (image instanceof File) await uploadPrimaryImage(client, String(data.id), input.name, input.imageAlt, image);
+    if (image instanceof File) {
+      await uploadPrimaryImage(
+        client,
+        String(data.id),
+        input.name,
+        input.imageAlt || `${input.name} ${input.partNumber} product image`,
+        image,
+      );
+    }
   } catch (saveError) {
     actionRedirect(`/admin/products/${data.id}/edit`, readableError(saveError));
   }
@@ -209,13 +239,19 @@ export async function updateProduct(productId: string, formData: FormData): Prom
 
   const client = await createClient();
   const status = publicationStatus(input);
+  const descriptions = catalogueDescriptions(input);
+  const { data: previousProduct } = await client
+    .from("products")
+    .select("slug")
+    .eq("id", productId)
+    .maybeSingle();
   const { error } = await client.from("products").update({
     name: input.name,
     slug: input.slug,
     part_number: input.partNumber,
     category: input.category,
-    short_description: input.shortDescription,
-    full_description: input.fullDescription,
+    short_description: descriptions.shortDescription,
+    full_description: descriptions.fullDescription,
     application_type: input.applicationType,
     availability: input.availability,
     featured: input.featured,
@@ -223,14 +259,29 @@ export async function updateProduct(productId: string, formData: FormData): Prom
     seo_title: input.seoTitle || null,
     seo_description: input.seoDescription || null,
     updated_by: profile.id,
-  }).eq("id", productId);
+  }).eq("id", productId).select("id").single();
 
-  if (error) actionRedirect(editPath, error.code === "23505" ? "That slug or part number already exists." : "The product could not be updated.");
+  if (error) {
+    actionRedirect(
+      editPath,
+      error.code === "23505"
+        ? "That slug or part number already exists."
+        : databaseWriteError(error, "The product could not be updated. Check the database connection and try again."),
+    );
+  }
 
   try {
     await saveRelatedData(client, productId, input);
     const image = formData.get("primaryImage");
-    if (image instanceof File) await uploadPrimaryImage(client, productId, input.name, input.imageAlt, image);
+    if (image instanceof File) {
+      await uploadPrimaryImage(
+        client,
+        productId,
+        input.name,
+        input.imageAlt || `${input.name} ${input.partNumber} product image`,
+        image,
+      );
+    }
   } catch (saveError) {
     actionRedirect(editPath, readableError(saveError));
   }
@@ -238,6 +289,9 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   revalidatePath("/admin");
   revalidatePath("/admin/products");
   revalidatePath("/products");
+  if (previousProduct?.slug && previousProduct.slug !== input.slug) {
+    revalidatePath(`/products/${previousProduct.slug}`);
+  }
   revalidatePath(`/products/${input.slug}`);
   actionRedirect(editPath, "Product updated successfully.");
 }
@@ -249,9 +303,8 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   if (!productId) actionRedirect("/admin/products", "No product was selected.");
   const client = await createClient();
   const { error } = await client.from("products").update({ publication_status: "archived", updated_by: profile.id }).eq("id", productId);
-  if (error) actionRedirect("/admin/products", "The product could not be archived.");
+  if (error) actionRedirect("/admin/products", databaseWriteError(error, "The product could not be archived."));
   revalidatePath("/admin/products");
   revalidatePath("/products");
   actionRedirect("/admin/products", "Product archived.");
 }
-

@@ -1,8 +1,10 @@
+import type { ProductCategoryKey } from "@/types/categories";
+
 export interface AdminProductListItem {
   id: string;
   name: string;
   partNumber: string;
-  category: "oil" | "fuel" | "air";
+  category: ProductCategoryKey;
   publicationStatus: "draft" | "review" | "published" | "archived";
   availability: string;
   featured: boolean;
@@ -14,7 +16,7 @@ export interface AdminProductFormValues {
   name: string;
   slug: string;
   partNumber: string;
-  category: "oil" | "fuel" | "air";
+  category: ProductCategoryKey;
   shortDescription: string;
   fullDescription: string;
   applicationType: "automotive" | "industrial" | "both";
@@ -30,4 +32,3 @@ export interface AdminProductFormValues {
   imageAlt: string;
   primaryImagePath: string | null;
 }
-
