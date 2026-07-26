@@ -29,6 +29,7 @@ function slugify(value: string): string {
 function revalidateBranchViews() {
   revalidatePath("/admin");
   revalidatePath("/admin/branches");
+  revalidatePath("/");
   revalidatePath("/branches");
   revalidatePath("/contact");
 }
