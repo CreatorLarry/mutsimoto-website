@@ -105,7 +105,7 @@ export function CatalogueExplorer({ products, initialQuery = "", initialCategory
       </div>
       <div className="mt-7 grid gap-8 lg:grid-cols-[250px_1fr]">
         <FilterSidebar className="hidden rounded-lg border border-[#353d43] bg-[#14191d] p-5 shadow-[0_12px_30px_rgba(0,0,0,0.24)] lg:block" filters={filters} options={options} onChange={setFilters} onReset={reset} />
-        <div>{searchError && <p className="mb-5 rounded-md border border-[#8e2d35] bg-[#321418] px-4 py-3 text-sm text-[#ffb8bd]" role="alert">{searchError}</p>}{searchLoading ? <LoadingState /> : filteredProducts.length > 0 ? <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div> : <EmptySearchState onReset={reset} />}</div>
+        <div>{searchError && <p className="mb-5 rounded-md border border-[#8e2d35] bg-[#321418] px-4 py-3 text-sm text-[#ffb8bd]" role="alert">{searchError}</p>}{searchLoading ? <LoadingState /> : filteredProducts.length > 0 ? <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3">{filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div> : <EmptySearchState onReset={reset} />}</div>
       </div>
       <FilterDrawer open={drawerOpen} filters={filters} options={options} onChange={setFilters} onReset={reset} onClose={() => setDrawerOpen(false)} resultCount={filteredProducts.length} />
     </div>
