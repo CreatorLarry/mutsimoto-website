@@ -14,6 +14,7 @@ import {
   FileSearch,
   LogOut,
   MailQuestion,
+  ScrollText,
   Settings,
   Users,
 } from "lucide-react";
@@ -39,6 +40,7 @@ const navigation: NavigationItem[] = [
   { label: "Branches", href: "/admin/branches", icon: Building2, permission: "content:manage" },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics:read" },
   { label: "Users", href: "/admin/users", icon: Users, permission: "users:manage" },
+  { label: "Activity logs", href: "/admin/logs", icon: ScrollText, permission: "audit:read" },
   { label: "Settings", href: "/admin/settings", icon: Settings, permission: "content:manage" },
 ];
 
@@ -69,4 +71,3 @@ export function AdminNavigation({ profile }: { profile: StaffProfile }) {
     </aside>
   );
 }
-

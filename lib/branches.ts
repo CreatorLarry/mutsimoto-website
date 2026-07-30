@@ -1,7 +1,7 @@
 import "server-only";
 
 import { branches as mockBranches } from "@/data/branches";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { isSupabaseConfigured, shouldUseMockData } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { Branch } from "@/types";
 
@@ -40,7 +40,7 @@ function mapBranch(record: BranchRecord): Branch {
 }
 
 export async function getBranches(): Promise<Branch[]> {
-  if (!isSupabaseConfigured()) return mockBranches;
+  if (!isSupabaseConfigured()) return shouldUseMockData() ? mockBranches : [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("branches")
@@ -50,7 +50,7 @@ export async function getBranches(): Promise<Branch[]> {
 
   if (error) {
     console.error("[branches:list]", { code: error.code, message: error.message });
-    return mockBranches;
+    return shouldUseMockData() ? mockBranches : [];
   }
   return ((data ?? []) as BranchRecord[]).map(mapBranch);
 }

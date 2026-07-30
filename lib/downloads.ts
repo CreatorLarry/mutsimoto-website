@@ -1,7 +1,7 @@
 import "server-only";
 
 import { downloads as mockDownloads } from "@/data/downloads";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { isSupabaseConfigured, shouldUseMockData } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { DownloadResource } from "@/types";
 
@@ -21,7 +21,7 @@ function formatFileSize(bytes: number): string {
 }
 
 export async function getDownloads(): Promise<DownloadResource[]> {
-  if (!isSupabaseConfigured()) return mockDownloads;
+  if (!isSupabaseConfigured()) return shouldUseMockData() ? mockDownloads : [];
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("downloads")
@@ -31,7 +31,7 @@ export async function getDownloads(): Promise<DownloadResource[]> {
 
   if (error) {
     console.error("[downloads:list]", { code: error.code, message: error.message });
-    return mockDownloads;
+    return shouldUseMockData() ? mockDownloads : [];
   }
 
   return ((data ?? []) as DownloadRecord[]).map((download) => ({

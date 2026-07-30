@@ -7,6 +7,10 @@ export function isSupabaseConfigured(): boolean {
   return PUBLIC_ENV_NAMES.every((name) => Boolean(process.env[name]?.trim()));
 }
 
+export function shouldUseMockData(): boolean {
+  return process.env.NODE_ENV !== "production" && !isSupabaseConfigured();
+}
+
 export function getSupabasePublicEnv(): { url: string; publishableKey: string } {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();

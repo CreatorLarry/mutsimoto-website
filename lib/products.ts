@@ -1,7 +1,7 @@
 import "server-only";
 
 import { products as mockProducts } from "@/data/products";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { isSupabaseConfigured, shouldUseMockData } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeProductCategoryKey, productCategoryLabels } from "@/types/categories";
 import type { ApplicationType, Product } from "@/types";
@@ -156,7 +156,7 @@ function catalogueError(scope: string, error: { message: string; code?: string }
 }
 
 export async function getProducts(): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return mockProducts;
+  if (!isSupabaseConfigured()) return shouldUseMockData() ? mockProducts : [];
   const supabase = await createClient();
   const { data, error } = await supabase.from("products").select(publicProductSelect).eq("publication_status", "published").order("part_number");
   if (error) throw catalogueError("list", error);
@@ -164,7 +164,11 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
-  if (!isSupabaseConfigured()) return mockProducts.filter((product) => product.featured).slice(0, limit);
+  if (!isSupabaseConfigured()) {
+    return shouldUseMockData()
+      ? mockProducts.filter((product) => product.featured).slice(0, limit)
+      : [];
+  }
   const supabase = await createClient();
   const { data, error } = await supabase.from("products").select(publicProductSelect).eq("publication_status", "published").eq("featured", true).order("updated_at", { ascending: false }).limit(limit);
   if (error) throw catalogueError("featured", error);
@@ -172,7 +176,11 @@ export async function getFeaturedProducts(limit = 6): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  if (!isSupabaseConfigured()) return mockProducts.find((product) => product.slug === slug);
+  if (!isSupabaseConfigured()) {
+    return shouldUseMockData()
+      ? mockProducts.find((product) => product.slug === slug)
+      : undefined;
+  }
   const supabase = await createClient();
   const { data, error } = await supabase.from("products").select(publicProductSelect).eq("slug", slug).eq("publication_status", "published").maybeSingle();
   if (error) throw catalogueError("detail", error);
@@ -194,6 +202,7 @@ export async function searchProducts(query: string, limit = 48): Promise<Product
   if (!cleanQuery) return getProducts();
 
   if (!isSupabaseConfigured()) {
+    if (!shouldUseMockData()) return [];
     const normalized = cleanQuery.toLowerCase();
     const reference = normalizedReference(cleanQuery);
     return mockProducts.filter((product) => {
