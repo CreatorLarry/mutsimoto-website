@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Archive, Edit3, Plus, Search } from "lucide-react";
+import { Archive, Edit3, FileSpreadsheet, Plus, Search } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { hasPermission } from "@/lib/auth/permissions";
@@ -21,7 +21,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
 
   return (
     <>
-      <AdminPageHeader title="Products" description="Manage catalogue details, technical data, fitment, imagery, and publication status." actions={canEdit && <Link href="/admin/products/new" className="button-primary"><Plus className="size-4" /> Add product</Link>} />
+      <AdminPageHeader title="Products" description="Manage catalogue details, technical data, fitment, imagery, and publication status." actions={canEdit && <><Link href="/admin/products/import" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#d7dee7] bg-white px-5 text-sm font-bold text-[#07172b] hover:border-[#a8b4c2]"><FileSpreadsheet className="size-4" /> Import workbook</Link><Link href="/admin/products/new" className="button-primary"><Plus className="size-4" /> Add product</Link></>} />
       {params.message && <p className="mt-6 rounded-xl border border-[#d7e1eb] bg-white px-4 py-3 text-sm text-[#526176]" role="status">{params.message}</p>}
       <form className="mt-7 grid gap-3 rounded-[20px] border border-[#e0e6ed] bg-white p-4 shadow-[0_8px_28px_rgba(7,23,43,0.04)] sm:grid-cols-[1fr_220px_auto]" action="/admin/products"><label className="relative"><span className="sr-only">Search products</span><Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#8390a2]" /><input name="query" defaultValue={params.query} placeholder="Search name or part number" className="h-12 w-full rounded-xl border border-[#dbe2ea] pl-11 pr-4 text-sm outline-none focus:border-[#e52833]" /></label><label><span className="sr-only">Filter by status</span><select name="status" defaultValue={params.status ?? ""} className="h-12 w-full rounded-xl border border-[#dbe2ea] bg-white px-4 text-sm font-bold text-[#334257] outline-none focus:border-[#e52833]"><option value="">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="review">Under review</option><option value="archived">Archived</option></select></label><button type="submit" className="button-dark">Apply filters</button></form>
       <div className="mt-6 overflow-hidden rounded-[22px] border border-[#e0e6ed] bg-white shadow-[0_8px_28px_rgba(7,23,43,0.04)]">
