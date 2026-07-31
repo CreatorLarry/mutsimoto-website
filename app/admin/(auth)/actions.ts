@@ -1,7 +1,7 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSiteOrigin } from "@/lib/site-origin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,13 +34,9 @@ export async function requestPasswordReset(formData: FormData): Promise<never> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email) redirectWithMessage("/admin/forgot-password", "Enter your staff email address.");
 
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host?.includes("localhost") ? "http" : "https");
-  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? `${protocol}://${host}`;
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/admin/reset-password`,
+    redirectTo: `${await getSiteOrigin()}/auth/callback?next=/admin/reset-password`,
   });
 
   redirectWithMessage(
@@ -66,4 +62,3 @@ export async function updatePassword(formData: FormData): Promise<never> {
   }
   redirectWithMessage("/admin/login", "Password updated. You can now sign in.");
 }
-

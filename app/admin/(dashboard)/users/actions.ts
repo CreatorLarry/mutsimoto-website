@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { ZodError } from "zod";
 import { requireStaff } from "@/lib/auth/session";
+import { getSiteOrigin } from "@/lib/site-origin";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { staffInviteFormData, staffUpdateFormData, type StaffInviteInput, type StaffUpdateInput } from "@/lib/validation/users";
 
@@ -19,11 +19,7 @@ function readableError(error: unknown): string {
 }
 
 async function invitationRedirectUrl(): Promise<string> {
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? `${protocol}://${host}`;
-  return `${origin}/auth/callback?next=/admin/reset-password`;
+  return `${await getSiteOrigin()}/auth/callback?next=/admin/reset-password`;
 }
 
 async function createInvitation(input: StaffInviteInput) {
