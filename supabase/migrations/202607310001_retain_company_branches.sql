@@ -100,8 +100,70 @@ $$;
 
 revoke execute on function private.audit_row_change() from public, anon, authenticated;
 
-create index if not exists audit_logs_action_date_idx
-on public.audit_logs(action, created_at desc);
-
-create index if not exists audit_logs_user_date_idx
-on public.audit_logs(user_id, created_at desc);
+insert into public.branches (
+  name,
+  slug,
+  address,
+  city,
+  phone,
+  whatsapp,
+  email,
+  opening_hours,
+  active
+)
+values
+  (
+    'Nakuru Head Office',
+    'nakuru',
+    'Biashara Street',
+    'Nakuru',
+    '+254 721 901 129',
+    '+254 721 901 129',
+    'sales@mutsimoto.com',
+    'Mon–Fri 8:00–17:00 · Sat 8:30–13:00',
+    true
+  ),
+  (
+    'Nairobi Industrial Area',
+    'nairobi-industrial-area',
+    '10 Dar Es Salaam Road',
+    'Nairobi',
+    '+254 726 692 705',
+    '+254 726 692 705',
+    'iabranch@mutsimoto.com',
+    'Mon–Fri 8:00–17:00 · Sat 8:30–13:00',
+    true
+  ),
+  (
+    'Nairobi Kirinyaga Road',
+    'nairobi-kirinyaga-road',
+    'Kirinyaga Road',
+    'Nairobi',
+    '+254 713 541 204',
+    '+254 713 541 204',
+    'krbranch@mutsimoto.com',
+    'Mon–Fri 8:00–17:00 · Sat 8:30–13:00',
+    true
+  ),
+  (
+    'Mombasa Branch',
+    'mombasa',
+    'Jomo Kenyatta Avenue - Station Road',
+    'Mombasa',
+    '+254 733 550 025',
+    '+254 733 550 025',
+    'msabranch@mutsimoto.co.ke',
+    'Mon–Fri 8:00–17:00 · Sat 8:30–13:00',
+    true
+  )
+on conflict (slug) do update
+set
+  name = excluded.name,
+  address = excluded.address,
+  city = excluded.city,
+  phone = excluded.phone,
+  whatsapp = excluded.whatsapp,
+  email = excluded.email,
+  opening_hours = excluded.opening_hours,
+  active = true,
+  updated_at = now();

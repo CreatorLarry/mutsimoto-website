@@ -36,7 +36,7 @@ export const auditEntityOptions = [
 export interface AuditActor {
   id: string;
   fullName: string;
-  email: string;
+  email: string | null;
 }
 
 export interface AdminAuditLog {
@@ -62,7 +62,6 @@ interface AuditLogRecord {
 interface ProfileRecord {
   id: string;
   full_name: string;
-  email: string;
 }
 
 export interface AuditLogFilters {
@@ -114,7 +113,7 @@ export async function getAdminAuditLogs(filters: AuditLogFilters = {}): Promise<
 
   const [logsResult, actorsResult] = await Promise.all([
     request,
-    supabase.from("profiles").select("id, full_name, email").order("full_name"),
+    supabase.from("profiles").select("id, full_name").order("full_name"),
   ]);
 
   if (logsResult.error) {
@@ -123,7 +122,7 @@ export async function getAdminAuditLogs(filters: AuditLogFilters = {}): Promise<
   }
 
   const actorRows = actorsResult.error ? [] : (actorsResult.data ?? []) as ProfileRecord[];
-  const actors = actorRows.map((actor) => ({ id: actor.id, fullName: actor.full_name, email: actor.email }));
+  const actors = actorRows.map((actor) => ({ id: actor.id, fullName: actor.full_name, email: null }));
   const actorMap = new Map(actors.map((actor) => [actor.id, actor]));
 
   return {
