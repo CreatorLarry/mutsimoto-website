@@ -1,7 +1,8 @@
 import "server-only";
 
 import { products as mockProducts } from "@/data/products";
-import { isSupabaseConfigured, shouldUseMockData } from "@/lib/supabase/env";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { isSupabaseConfigured, isSupabaseSecretConfigured, shouldUseMockData } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeProductCategoryKey, productCategoryLabels } from "@/types/categories";
 import type { ApplicationType, Product } from "@/types";
@@ -89,7 +90,13 @@ async function signedPathMap(
 ): Promise<Map<string, string>> {
   const uniquePaths = [...new Set(paths.filter((path) => path && !path.startsWith("/") && !path.startsWith("http")))];
   if (uniquePaths.length === 0) return new Map();
-  const supabase = await createClient();
+
+  // Public catalogue data is already limited to published products. Sign its
+  // private media on the server so image visibility never depends on a
+  // visitor having an authenticated staff session.
+  const supabase = isSupabaseSecretConfigured()
+    ? createAdminClient()
+    : await createClient();
   const signed = await Promise.all(uniquePaths.map(async (path) => {
     const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60);
     return error || !data ? null : [path, data.signedUrl] as const;
