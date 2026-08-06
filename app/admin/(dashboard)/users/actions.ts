@@ -6,7 +6,13 @@ import { ZodError } from "zod";
 import { requireStaff } from "@/lib/auth/session";
 import { getSiteOrigin } from "@/lib/site-origin";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { staffInviteFormData, staffUpdateFormData, type StaffInviteInput, type StaffUpdateInput } from "@/lib/validation/users";
+import {
+  staffDeleteSchema,
+  staffInviteFormData,
+  staffUpdateFormData,
+  type StaffInviteInput,
+  type StaffUpdateInput,
+} from "@/lib/validation/users";
 
 function actionRedirect(message: string): never {
   redirect(`/admin/users?message=${encodeURIComponent(message)}`);
@@ -121,4 +127,65 @@ export async function updateStaffUser(formData: FormData): Promise<void> {
   }
   revalidatePath("/admin/users");
   actionRedirect("Staff account updated.");
+}
+
+export async function deleteStaffUser(formData: FormData): Promise<void> {
+  const currentProfile = await requireStaff("users:manage");
+  const parsed = staffDeleteSchema.safeParse({ userId: formData.get("userId") });
+  if (!parsed.success) actionRedirect("No valid staff account was selected.");
+  if (parsed.data.userId === currentProfile.id) {
+    actionRedirect("You cannot delete your own staff account.");
+  }
+
+  const admin = createAdminClient();
+  const { data: target, error: targetError } = await admin
+    .from("profiles")
+    .select("id, full_name, role, active")
+    .eq("id", parsed.data.userId)
+    .maybeSingle();
+  if (targetError || !target) actionRedirect("The selected staff account could not be found.");
+
+  if (target.role === "super_admin" && target.active) {
+    const { count, error } = await admin
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "super_admin")
+      .eq("active", true);
+    if (error) actionRedirect("The super-administrator safeguards could not be checked.");
+    if ((count ?? 0) <= 1) actionRedirect("The final active super-administrator account cannot be deleted.");
+  }
+
+  const { count: noteCount, error: noteError } = await admin
+    .from("enquiry_notes")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", parsed.data.userId);
+  if (noteError) actionRedirect("The staff account history could not be checked.");
+  if ((noteCount ?? 0) > 0) {
+    actionRedirect("This account has enquiry notes that must be retained. Disable the account instead of deleting it.");
+  }
+
+  const { error: deleteError } = await admin.auth.admin.deleteUser(parsed.data.userId);
+  if (deleteError) {
+    console.error("[admin:staff-delete]", { code: deleteError.code, message: deleteError.message });
+    actionRedirect("The staff account could not be permanently deleted. Disable it and review the Supabase Auth logs.");
+  }
+
+  const { error: auditError } = await admin.from("audit_logs").insert({
+    user_id: currentProfile.id,
+    action: "staff_user_deleted",
+    entity_type: "profiles",
+    entity_id: parsed.data.userId,
+    metadata: {
+      operation: "DELETE",
+      entity_label: target.full_name,
+      actor_name: currentProfile.fullName,
+      actor_email: currentProfile.email,
+      deleted_role: target.role,
+    },
+  });
+  if (auditError) console.error("[admin:staff-delete-audit]", { code: auditError.code, message: auditError.message });
+
+  revalidatePath("/admin/users");
+  revalidatePath("/admin/logs");
+  actionRedirect(`${target.full_name}'s staff account was permanently deleted.`);
 }

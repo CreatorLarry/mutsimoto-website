@@ -6,7 +6,7 @@ import type { Product } from "@/types";
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="product-card group flex h-full flex-col overflow-hidden rounded-md border border-[#353d43] bg-[#14191d] shadow-[0_10px_24px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ef3340] hover:shadow-[0_20px_48px_rgba(0,0,0,0.42)] sm:rounded-lg sm:shadow-[0_14px_34px_rgba(0,0,0,0.28)]">
-      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="block aspect-[4/3] overflow-hidden border-b border-[#353d43] bg-[#171c20] sm:aspect-square"><FilterVisual category={product.category} compact imageSrc={product.image} /></Link>
+      <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="block aspect-[4/3] overflow-hidden border-b border-[#353d43] bg-[#171c20]"><FilterVisual category={product.category} compact imageSrc={product.image} imageAlt={`${product.name} (${product.partNumber})`} /></Link>
       <div className="flex flex-1 flex-col p-3 sm:p-6">
         <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <span className="max-w-full truncate border-l-2 border-[#ef3340] bg-[#232a30] px-2 py-0.5 text-[7px] font-extrabold uppercase tracking-[0.1em] text-[#f4f5f5] sm:px-2.5 sm:py-1 sm:text-[9px] sm:tracking-[0.14em]">{product.category}</span>

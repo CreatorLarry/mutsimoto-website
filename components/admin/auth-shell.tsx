@@ -10,7 +10,7 @@ interface AuthShellProps {
 
 export function AuthShell({ title, description, children }: AuthShellProps) {
   return (
-    <main className="min-h-screen bg-[#07172b] px-5 py-10 sm:px-8">
+    <main className="admin-control-surface min-h-screen bg-[#07172b] px-5 py-10 sm:px-8">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl overflow-hidden rounded-[30px] bg-white shadow-[0_30px_100px_rgba(0,0,0,0.3)] lg:grid-cols-[0.88fr_1.12fr]">
         <section className="relative hidden overflow-hidden bg-[#0b213b] p-12 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="absolute inset-0 blueprint-grid-dark opacity-60" />
@@ -41,4 +41,3 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
     </main>
   );
 }
-

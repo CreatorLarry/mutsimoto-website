@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import { hasPermission } from "@/lib/auth/permissions";
 import { requireStaff } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
@@ -307,4 +307,67 @@ export async function archiveProduct(formData: FormData): Promise<void> {
   revalidatePath("/admin/products");
   revalidatePath("/products");
   actionRedirect("/admin/products", "Product archived.");
+}
+
+export async function deleteProduct(formData: FormData): Promise<void> {
+  const profile = await requireStaff("products:write");
+  if (profile.role !== "super_admin") {
+    actionRedirect("/admin/products", "Only a super administrator can permanently delete products.");
+  }
+
+  const productId = z.string().uuid().safeParse(formData.get("productId"));
+  if (!productId.success) actionRedirect("/admin/products", "No valid product was selected.");
+
+  const client = await createClient();
+  const [{ data: product, error: productError }, { data: images, error: imagesError }] = await Promise.all([
+    client
+      .from("products")
+      .select("name, slug, primary_image_url, technical_sheet_url")
+      .eq("id", productId.data)
+      .maybeSingle(),
+    client
+      .from("product_images")
+      .select("storage_path")
+      .eq("product_id", productId.data),
+  ]);
+
+  if (productError || imagesError || !product) {
+    actionRedirect("/admin/products", "The selected product could not be found.");
+  }
+
+  const { data: deleted, error: deleteError } = await client
+    .from("products")
+    .delete()
+    .eq("id", productId.data)
+    .select("id")
+    .maybeSingle();
+  if (deleteError || !deleted) {
+    actionRedirect("/admin/products", databaseWriteError(deleteError, "The product could not be deleted."));
+  }
+
+  const imagePaths = [...new Set([
+    product.primary_image_url,
+    ...(images ?? []).map((image) => image.storage_path),
+  ].filter((path): path is string => Boolean(path) && !/^https?:\/\//i.test(path)))];
+  const technicalSheetPath = product.technical_sheet_url;
+  const cleanupResults = await Promise.all([
+    imagePaths.length > 0
+      ? client.storage.from("product-images").remove(imagePaths)
+      : Promise.resolve({ error: null }),
+    technicalSheetPath && !/^https?:\/\//i.test(technicalSheetPath)
+      ? client.storage.from("technical-sheets").remove([technicalSheetPath])
+      : Promise.resolve({ error: null }),
+  ]);
+  const mediaCleanupFailed = cleanupResults.some((result) => Boolean(result.error));
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/products");
+  revalidatePath("/products");
+  revalidatePath(`/products/${product.slug}`);
+  actionRedirect(
+    "/admin/products",
+    mediaCleanupFailed
+      ? `${product.name} was deleted, but one or more stored media files need manual cleanup.`
+      : `${product.name} was permanently deleted.`,
+  );
 }

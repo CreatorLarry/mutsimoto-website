@@ -15,6 +15,13 @@ interface ProductListRecord {
   updated_at: string;
 }
 
+export interface AdminProductPage {
+  products: AdminProductListItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 interface SpecificationRecord { label: string; value: string; unit: string | null; display_order: number }
 interface ReferenceRecord { reference_type: "oem" | "competitor" | "alternative"; manufacturer: string; reference_number: string }
 interface ProductImageRecord { storage_path: string; alt_text: string; is_primary: boolean; display_order: number }
@@ -54,12 +61,19 @@ interface ProductDetailRecord {
   product_equipment_applications: EquipmentApplicationRecord[];
 }
 
-export async function getAdminProducts(options: { query?: string; status?: string } = {}): Promise<AdminProductListItem[]> {
+export async function getAdminProducts(
+  options: { query?: string; status?: string; page?: string | number } = {},
+): Promise<AdminProductPage> {
   const supabase = await createClient();
+  const requestedPage = Number(options.page);
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const pageSize = 12;
+  const start = (page - 1) * pageSize;
   let request = supabase
     .from("products")
-    .select("id, name, part_number, category, publication_status, availability, featured, updated_at")
-    .order("updated_at", { ascending: false });
+    .select("id, name, part_number, category, publication_status, availability, featured, updated_at", { count: "exact" })
+    .order("updated_at", { ascending: false })
+    .range(start, start + pageSize - 1);
 
   const query = options.query?.trim().replace(/[,()%]/g, "");
   if (query) request = request.or(`name.ilike.%${query}%,part_number.ilike.%${query}%`);
@@ -67,18 +81,23 @@ export async function getAdminProducts(options: { query?: string; status?: strin
     request = request.eq("publication_status", options.status as "draft" | "review" | "published" | "archived");
   }
 
-  const { data, error } = await request;
+  const { data, error, count } = await request;
   if (error) throw new Error("Unable to load administration products.");
-  return ((data ?? []) as ProductListRecord[]).map((product) => ({
-    id: product.id,
-    name: product.name,
-    partNumber: product.part_number,
-    category: normalizeProductCategoryKey(product.category),
-    publicationStatus: product.publication_status,
-    availability: product.availability,
-    featured: product.featured,
-    updatedAt: product.updated_at,
-  }));
+  return {
+    products: ((data ?? []) as ProductListRecord[]).map((product) => ({
+      id: product.id,
+      name: product.name,
+      partNumber: product.part_number,
+      category: normalizeProductCategoryKey(product.category),
+      publicationStatus: product.publication_status,
+      availability: product.availability,
+      featured: product.featured,
+      updatedAt: product.updated_at,
+    })),
+    total: count ?? 0,
+    page,
+    pageSize,
+  };
 }
 
 export async function getAdminProduct(id: string): Promise<AdminProductFormValues | null> {

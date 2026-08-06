@@ -16,6 +16,10 @@ export const staffUpdateSchema = z.object({
   canPublishProducts: z.boolean(),
 });
 
+export const staffDeleteSchema = z.object({
+  userId: z.string().uuid(),
+});
+
 export type StaffInviteInput = z.infer<typeof staffInviteSchema>;
 export type StaffUpdateInput = z.infer<typeof staffUpdateSchema>;
 

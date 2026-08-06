@@ -7,10 +7,11 @@ interface FilterVisualProps {
   compact?: boolean;
   dark?: boolean;
   imageSrc?: string | null;
+  imageAlt?: string;
   className?: string;
 }
 
-export function FilterVisual({ category, compact = false, dark = false, imageSrc, className }: FilterVisualProps) {
+export function FilterVisual({ category, compact = false, dark = false, imageSrc, imageAlt, className }: FilterVisualProps) {
   const isAir = category === "Air Cleaners";
   const isFuel = category === "Fuel Elements" || category === "Fuel Spin On";
   const isElement = category === "Oil Element" || category === "Fuel Elements";
@@ -24,15 +25,18 @@ export function FilterVisual({ category, compact = false, dark = false, imageSrc
 
   if (hasRenderableImage) {
     return (
-      <div className={cn("filter-stage relative grid h-full min-h-0 w-full overflow-hidden bg-[#171c20]", className)}>
-        <Image
-          src={imageSrc as string}
-          alt={`${category} product image`}
-          fill
-          sizes={compact ? "(max-width: 640px) 100vw, 33vw" : "(max-width: 1024px) 100vw, 50vw"}
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.025]"
-          style={{ objectPosition: imagePosition }}
-        />
+      <div className={cn("filter-stage relative isolate grid h-full min-h-0 w-full overflow-hidden bg-[#171c20]", className)}>
+        <div className={cn("absolute z-[1]", compact ? "inset-[3%] sm:inset-[5%]" : "inset-[4%] sm:inset-[6%]")}>
+          <Image
+            src={imageSrc as string}
+            alt={imageAlt ?? `${category} product image`}
+            fill
+            sizes={compact ? "(max-width: 640px) 50vw, 33vw" : "(max-width: 1024px) 100vw, 50vw"}
+            className="object-contain transition-transform duration-500 group-hover:scale-[1.015]"
+            style={{ objectPosition: imagePosition }}
+          />
+        </div>
+        <div className="pointer-events-none absolute inset-x-[8%] bottom-[4%] z-0 h-[8%] rounded-[50%] bg-black/35 blur-lg" aria-hidden="true" />
       </div>
     );
   }

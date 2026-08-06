@@ -108,6 +108,31 @@ h1, h2, h3, h4, h5, h6 {
 
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
 
+.admin-control-surface {
+  color-scheme: light;
+}
+
+.admin-control-surface input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.admin-control-surface select,
+.admin-control-surface textarea {
+  background-color: #ffffff;
+  color: #17283d;
+  caret-color: #d51f2a;
+}
+
+.admin-control-surface input::placeholder,
+.admin-control-surface textarea::placeholder {
+  color: #7c899b;
+  opacity: 1;
+}
+
+.admin-control-surface input:-webkit-autofill,
+.admin-control-surface input:-webkit-autofill:hover,
+.admin-control-surface input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #17283d;
+  box-shadow: 0 0 0 1000px #ffffff inset;
+}
+
 ::selection { background: var(--brand-red); color: #ffffff; }
 
 @layer components {
