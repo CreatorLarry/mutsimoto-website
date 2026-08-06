@@ -25,18 +25,28 @@ export function FilterVisual({ category, compact = false, dark = false, imageSrc
 
   if (hasRenderableImage) {
     return (
-      <div className={cn("filter-stage relative isolate grid h-full min-h-0 w-full overflow-hidden bg-[#171c20]", className)}>
-        <div className={cn("absolute z-[1]", compact ? "inset-[3%] sm:inset-[5%]" : "inset-[4%] sm:inset-[6%]")}>
+      <div className={cn("relative isolate grid h-full min-h-0 w-full overflow-hidden bg-[#dfe4e7]", className)}>
+        <Image
+          src={imageSrc as string}
+          alt=""
+          fill
+          sizes={compact ? "(max-width: 640px) 50vw, 33vw" : "(max-width: 1024px) 100vw, 50vw"}
+          className="scale-110 object-cover opacity-30 blur-2xl saturate-75"
+          aria-hidden="true"
+        />
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(135deg,rgba(255,255,255,0.82),rgba(224,229,232,0.54)_48%,rgba(255,255,255,0.76))]" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-3 z-[2] border border-white/60 shadow-[inset_0_0_32px_rgba(52,63,72,0.08)] sm:inset-4" aria-hidden="true" />
+        <div className={cn("absolute z-[3]", compact ? "inset-[2%] sm:inset-[3%]" : "inset-[3%] sm:inset-[4%]")}>
           <Image
             src={imageSrc as string}
             alt={imageAlt ?? `${category} product image`}
             fill
             sizes={compact ? "(max-width: 640px) 50vw, 33vw" : "(max-width: 1024px) 100vw, 50vw"}
-            className="object-contain transition-transform duration-500 group-hover:scale-[1.015]"
+            className="object-contain drop-shadow-[0_18px_18px_rgba(19,29,38,0.2)] transition-transform duration-500 group-hover:scale-[1.01]"
             style={{ objectPosition: imagePosition }}
           />
         </div>
-        <div className="pointer-events-none absolute inset-x-[8%] bottom-[4%] z-0 h-[8%] rounded-[50%] bg-black/35 blur-lg" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-x-[12%] bottom-[3%] z-[2] h-[7%] rounded-[50%] bg-[#1a2025]/20 blur-xl" aria-hidden="true" />
       </div>
     );
   }
