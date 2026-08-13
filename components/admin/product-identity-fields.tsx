@@ -3,18 +3,11 @@
 import { useMemo, useState } from "react";
 import { Link2 } from "lucide-react";
 import { productCategoryOptions, type ProductCategoryKey } from "@/types/categories";
+import { productAvailabilityOptions } from "@/types/product-admin";
 
 const fieldClass =
   "mt-2 h-12 w-full rounded-xl border border-[#d8e0e8] bg-white px-4 text-sm font-semibold text-[#07172b] outline-none transition placeholder:font-normal placeholder:text-[#9aa5b4] focus:border-[#e52833] focus:ring-4 focus:ring-[#e52833]/10";
 const labelClass = "block text-xs font-extrabold text-[#344358]";
-
-const availabilityOptions = [
-  "In stock",
-  "Available to order",
-  "Limited stock",
-  "Contact for availability",
-  "Out of stock",
-] as const;
 
 interface ProductIdentityFieldsProps {
   initial?: {
@@ -45,7 +38,9 @@ export function ProductIdentityFields({ initial }: ProductIdentityFieldsProps) {
   const slug = initialValuesUnchanged && initial?.slug ? initial.slug : generatedSlug;
   const hasCustomAvailability =
     Boolean(initial?.availability) &&
-    !availabilityOptions.includes(initial?.availability as (typeof availabilityOptions)[number]);
+    !productAvailabilityOptions.includes(
+      initial?.availability as (typeof productAvailabilityOptions)[number],
+    );
 
   return (
     <>
@@ -123,7 +118,7 @@ export function ProductIdentityFields({ initial }: ProductIdentityFieldsProps) {
             className={fieldClass}
           >
             {hasCustomAvailability && <option value={initial?.availability}>{initial?.availability}</option>}
-            {availabilityOptions.map((option) => (
+            {productAvailabilityOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>

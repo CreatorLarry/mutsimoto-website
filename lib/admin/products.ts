@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { normalizeProductCategoryKey } from "@/types/categories";
+import { productAvailabilityOptions } from "@/types/product-admin";
 import type { AdminProductFormValues, AdminProductListItem } from "@/types/product-admin";
 
 interface ProductListRecord {
@@ -62,7 +63,13 @@ interface ProductDetailRecord {
 }
 
 export async function getAdminProducts(
-  options: { query?: string; status?: string; page?: string | number } = {},
+  options: {
+    query?: string;
+    status?: string;
+    availability?: string;
+    category?: string;
+    page?: string | number;
+  } = {},
 ): Promise<AdminProductPage> {
   const supabase = await createClient();
   const requestedPage = Number(options.page);
@@ -75,10 +82,26 @@ export async function getAdminProducts(
     .order("updated_at", { ascending: false })
     .range(start, start + pageSize - 1);
 
-  const query = options.query?.trim().replace(/[,()%]/g, "");
-  if (query) request = request.or(`name.ilike.%${query}%,part_number.ilike.%${query}%`);
+  const rawQuery = options.query?.trim() ?? "";
+  const partNumbers = rawQuery
+    .split(/[,;]+/)
+    .map((value) => value.trim().toLowerCase().replace(/[^a-z0-9]/g, ""))
+    .filter(Boolean)
+    .slice(0, 100);
+  if (partNumbers.length > 1) {
+    request = request.in("part_number_normalized", [...new Set(partNumbers)]);
+  } else {
+    const query = rawQuery.replace(/[,()%]/g, "");
+    if (query) request = request.or(`name.ilike.%${query}%,part_number.ilike.%${query}%`);
+  }
   if (["draft", "review", "published", "archived"].includes(options.status ?? "")) {
     request = request.eq("publication_status", options.status as "draft" | "review" | "published" | "archived");
+  }
+  if (productAvailabilityOptions.some((value) => value === options.availability)) {
+    request = request.eq("availability", options.availability as (typeof productAvailabilityOptions)[number]);
+  }
+  if (["oil_element", "oil_spin_on", "fuel_elements", "fuel_spin_on", "air_cleaners"].includes(options.category ?? "")) {
+    request = request.eq("category", options.category as "oil_element" | "oil_spin_on" | "fuel_elements" | "fuel_spin_on" | "air_cleaners");
   }
 
   const { data, error, count } = await request;

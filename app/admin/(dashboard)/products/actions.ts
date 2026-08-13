@@ -9,6 +9,11 @@ import { createClient } from "@/lib/supabase/server";
 import { databaseWriteError } from "@/lib/supabase/errors";
 import { productCategoryLabels } from "@/types/categories";
 import {
+  productAvailabilityOptions,
+  productPublicationStatuses,
+  type ProductPublicationStatus,
+} from "@/types/product-admin";
+import {
   parseEquipmentApplications,
   parseReferences,
   parseSpecifications,
@@ -25,6 +30,13 @@ type StaffSupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 function actionRedirect(path: string, message: string): never {
   redirect(`${path}${path.includes("?") ? "&" : "?"}message=${encodeURIComponent(message)}`);
+}
+
+function productListReturnPath(formData: FormData): string {
+  const value = String(formData.get("returnPath") ?? "");
+  return value.startsWith("/admin/products") && !value.startsWith("//")
+    ? value
+    : "/admin/products";
 }
 
 function readableError(error: unknown): string {
@@ -298,25 +310,107 @@ export async function updateProduct(productId: string, formData: FormData): Prom
 
 export async function archiveProduct(formData: FormData): Promise<void> {
   const profile = await requireStaff("products:write");
-  if (!hasPermission(profile, "products:publish")) actionRedirect("/admin/products", "You do not have permission to archive products.");
+  const returnPath = productListReturnPath(formData);
+  if (!hasPermission(profile, "products:publish")) actionRedirect(returnPath, "You do not have permission to archive products.");
   const productId = String(formData.get("productId") ?? "");
-  if (!productId) actionRedirect("/admin/products", "No product was selected.");
+  if (!productId) actionRedirect(returnPath, "No product was selected.");
   const client = await createClient();
   const { error } = await client.from("products").update({ publication_status: "archived", updated_by: profile.id }).eq("id", productId);
-  if (error) actionRedirect("/admin/products", databaseWriteError(error, "The product could not be archived."));
+  if (error) actionRedirect(returnPath, databaseWriteError(error, "The product could not be archived."));
+  revalidatePath("/admin");
   revalidatePath("/admin/products");
+  revalidatePath("/admin/logs");
   revalidatePath("/products");
-  actionRedirect("/admin/products", "Product archived.");
+  actionRedirect(returnPath, "Product archived.");
+}
+
+interface BulkProductUpdate {
+  updated_by: string;
+  availability?: string;
+  publication_status?: ProductPublicationStatus;
+  featured?: boolean;
+}
+
+export async function bulkUpdateProducts(formData: FormData): Promise<void> {
+  const profile = await requireStaff("products:write");
+  const returnPath = productListReturnPath(formData);
+  const productIds = [...new Set(formData.getAll("productIds").map(String))];
+  const parsedIds = z.array(z.string().uuid()).min(1).max(100).safeParse(productIds);
+  if (!parsedIds.success) {
+    actionRedirect(returnPath, "Select between 1 and 100 valid products before applying a bulk change.");
+  }
+
+  const field = String(formData.get("bulkField") ?? "");
+  const value = String(formData.get("bulkValue") ?? "");
+  const updates: BulkProductUpdate = { updated_by: profile.id };
+  let changeLabel = "products";
+
+  if (field === "availability") {
+    if (!productAvailabilityOptions.some((option) => option === value)) {
+      actionRedirect(returnPath, "Choose a valid availability value.");
+    }
+    updates.availability = value;
+    changeLabel = `availability to ${value}`;
+  } else if (field === "publication_status") {
+    if (!productPublicationStatuses.some((status) => status === value)) {
+      actionRedirect(returnPath, "Choose a valid publication status.");
+    }
+    if (
+      (value === "published" || value === "archived")
+      && !hasPermission(profile, "products:publish")
+    ) {
+      actionRedirect(returnPath, "You do not have permission to publish or archive products.");
+    }
+    updates.publication_status = value as ProductPublicationStatus;
+    changeLabel = `status to ${value.replaceAll("_", " ")}`;
+  } else if (field === "featured") {
+    if (value !== "true" && value !== "false") {
+      actionRedirect(returnPath, "Choose whether the products should be featured.");
+    }
+    updates.featured = value === "true";
+    changeLabel = value === "true" ? "homepage placement to featured" : "homepage placement to standard";
+  } else {
+    actionRedirect(returnPath, "Choose a valid bulk change.");
+  }
+
+  const client = await createClient();
+  const { data, error } = await client
+    .from("products")
+    .update(updates)
+    .in("id", parsedIds.data)
+    .select("id");
+
+  if (error) {
+    actionRedirect(
+      returnPath,
+      databaseWriteError(error, "The selected products could not be updated."),
+    );
+  }
+
+  const changedCount = data?.length ?? 0;
+  if (changedCount === 0) {
+    actionRedirect(returnPath, "No products were changed. Refresh the page and try again.");
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/logs");
+  revalidatePath("/products");
+  actionRedirect(
+    returnPath,
+    `Updated ${changeLabel} for ${changedCount} ${changedCount === 1 ? "product" : "products"}.`,
+  );
 }
 
 export async function deleteProduct(formData: FormData): Promise<void> {
   const profile = await requireStaff("products:write");
+  const returnPath = productListReturnPath(formData);
   if (profile.role !== "super_admin") {
-    actionRedirect("/admin/products", "Only a super administrator can permanently delete products.");
+    actionRedirect(returnPath, "Only a super administrator can permanently delete products.");
   }
 
   const productId = z.string().uuid().safeParse(formData.get("productId"));
-  if (!productId.success) actionRedirect("/admin/products", "No valid product was selected.");
+  if (!productId.success) actionRedirect(returnPath, "No valid product was selected.");
 
   const client = await createClient();
   const [{ data: product, error: productError }, { data: images, error: imagesError }] = await Promise.all([
@@ -332,7 +426,7 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   ]);
 
   if (productError || imagesError || !product) {
-    actionRedirect("/admin/products", "The selected product could not be found.");
+    actionRedirect(returnPath, "The selected product could not be found.");
   }
 
   const { data: deleted, error: deleteError } = await client
@@ -342,7 +436,7 @@ export async function deleteProduct(formData: FormData): Promise<void> {
     .select("id")
     .maybeSingle();
   if (deleteError || !deleted) {
-    actionRedirect("/admin/products", databaseWriteError(deleteError, "The product could not be deleted."));
+    actionRedirect(returnPath, databaseWriteError(deleteError, "The product could not be deleted."));
   }
 
   const imagePaths = [...new Set([
@@ -362,10 +456,11 @@ export async function deleteProduct(formData: FormData): Promise<void> {
 
   revalidatePath("/admin");
   revalidatePath("/admin/products");
+  revalidatePath("/admin/logs");
   revalidatePath("/products");
   revalidatePath(`/products/${product.slug}`);
   actionRedirect(
-    "/admin/products",
+    returnPath,
     mediaCleanupFailed
       ? `${product.name} was deleted, but one or more stored media files need manual cleanup.`
       : `${product.name} was permanently deleted.`,
