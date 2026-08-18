@@ -124,4 +124,10 @@ export interface ProductImportCommitResult {
     images: number;
     technicalSheets: number;
   };
+  progress: {
+    processed: number;
+    total: number;
+    nextOffset: number | null;
+    complete: boolean;
+  };
 }

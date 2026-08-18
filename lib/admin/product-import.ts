@@ -245,8 +245,11 @@ async function saveProduct(
 export async function importProductWorkbook(
   parsed: ParsedProductWorkbook,
   profile: StaffProfile,
+  options: { offset: number; limit: number },
 ): Promise<ProductImportCommitResult> {
   const client = await createClient();
+  const products = parsed.products.slice(options.offset, options.offset + options.limit);
+  const nextOffset = options.offset + products.length;
   const result: ProductImportCommitResult = {
     created: 0,
     updated: 0,
@@ -255,9 +258,15 @@ export async function importProductWorkbook(
       images: parsed.totals.images,
       technicalSheets: parsed.totals.technicalSheets,
     },
+    progress: {
+      processed: products.length,
+      total: parsed.products.length,
+      nextOffset: nextOffset < parsed.products.length ? nextOffset : null,
+      complete: nextOffset >= parsed.products.length,
+    },
   };
 
-  for (const product of parsed.products) {
+  for (const product of products) {
     try {
       const action = await saveProduct(client, profile, product);
       result[action] += 1;

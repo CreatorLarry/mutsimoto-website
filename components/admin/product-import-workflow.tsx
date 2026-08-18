@@ -21,6 +21,15 @@ import type {
 
 type WorkflowPhase = "idle" | "previewing" | "ready" | "importing" | "complete";
 
+interface ImportResumeState {
+  offset: number;
+  created: number;
+  updated: number;
+  failed: ProductImportCommitResult["failed"];
+}
+
+const importBatchSize = 8;
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -37,6 +46,48 @@ function messageFromResponse(value: unknown, fallback: string): string {
     return value.message;
   }
   return fallback;
+}
+
+async function readResponse(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function requestFailureMessage(
+  response: Response,
+  body: unknown,
+  fallback: string,
+): string {
+  const message = messageFromResponse(body, "");
+  if (message) return message;
+  if (response.status === 401) return "Your staff session has expired. Sign in again.";
+  if (response.status === 413) return "The workbook is too large for the server to receive.";
+  if (response.status >= 500) {
+    return "The server interrupted this import batch. Your completed batches are safe and the import can be resumed.";
+  }
+  return fallback;
+}
+
+function isCommitResult(value: unknown): value is ProductImportCommitResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "created" in value &&
+    typeof value.created === "number" &&
+    "updated" in value &&
+    typeof value.updated === "number" &&
+    "failed" in value &&
+    Array.isArray(value.failed) &&
+    "progress" in value &&
+    typeof value.progress === "object" &&
+    value.progress !== null &&
+    "nextOffset" in value.progress
+  );
 }
 
 function Stat({ label, value }: { label: string; value: number }) {
@@ -56,6 +107,8 @@ export function ProductImportWorkflow() {
   const [phase, setPhase] = useState<WorkflowPhase>("idle");
   const [preview, setPreview] = useState<ProductImportPreview | null>(null);
   const [result, setResult] = useState<ProductImportCommitResult | null>(null);
+  const [resume, setResume] = useState<ImportResumeState | null>(null);
+  const [processedProducts, setProcessedProducts] = useState(0);
   const [error, setError] = useState("");
   const busy = phase === "previewing" || phase === "importing";
 
@@ -63,6 +116,8 @@ export function ProductImportWorkflow() {
     setFile(nextFile);
     setPreview(null);
     setResult(null);
+    setResume(null);
+    setProcessedProducts(0);
     setError("");
     setPhase("idle");
   }
@@ -85,6 +140,8 @@ export function ProductImportWorkflow() {
     setPhase("previewing");
     setPreview(null);
     setResult(null);
+    setResume(null);
+    setProcessedProducts(0);
     setError("");
     const formData = new FormData();
     formData.set("workbook", file);
@@ -94,10 +151,13 @@ export function ProductImportWorkflow() {
         method: "POST",
         body: formData,
       });
-      const body: unknown = await response.json();
+      const body = await readResponse(response);
       if (!response.ok) {
-        throw new Error(messageFromResponse(body, "The workbook could not be previewed."));
+        throw new Error(
+          requestFailureMessage(response, body, "The workbook could not be previewed."),
+        );
       }
+      if (!body) throw new Error("The server returned an unreadable workbook preview.");
       setPreview(body as ProductImportPreview);
       setPhase("ready");
     } catch (caught) {
@@ -111,22 +171,72 @@ export function ProductImportWorkflow() {
     setPhase("importing");
     setResult(null);
     setError("");
-    const formData = new FormData();
-    formData.set("workbook", file);
+    let offset = resume?.offset ?? 0;
+    let created = resume?.created ?? 0;
+    let updated = resume?.updated ?? 0;
+    let failed = resume?.failed ?? [];
 
     try {
-      const response = await fetch("/api/admin/products/import/commit", {
-        method: "POST",
-        body: formData,
-      });
-      const body: unknown = await response.json();
-      if (!response.ok) {
-        throw new Error(messageFromResponse(body, "The workbook could not be imported."));
+      while (offset < preview.totals.products) {
+        const formData = new FormData();
+        formData.set("workbook", file);
+        formData.set("offset", String(offset));
+        formData.set("batchSize", String(importBatchSize));
+
+        const response = await fetch("/api/admin/products/import/commit", {
+          method: "POST",
+          body: formData,
+        });
+        const body = await readResponse(response);
+        if (!response.ok) {
+          throw new Error(
+            requestFailureMessage(response, body, "The workbook could not be imported."),
+          );
+        }
+        if (!isCommitResult(body)) {
+          throw new Error(
+            "The server returned an unreadable import response. The import can be resumed safely.",
+          );
+        }
+
+        created += body.created;
+        updated += body.updated;
+        failed = [...failed, ...body.failed];
+        offset = body.progress.nextOffset ?? preview.totals.products;
+        setProcessedProducts(offset);
+        setResume({ offset, created, updated, failed });
       }
-      setResult(body as ProductImportCommitResult);
+
+      setResult({
+        created,
+        updated,
+        failed,
+        mediaPending: {
+          images: preview.totals.images,
+          technicalSheets: preview.totals.technicalSheets,
+        },
+        progress: {
+          processed: preview.totals.products,
+          total: preview.totals.products,
+          nextOffset: null,
+          complete: true,
+        },
+      });
+      setResume(null);
       setPhase("complete");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The workbook could not be imported.");
+      setResume({ offset, created, updated, failed });
+      const reason =
+        caught instanceof TypeError
+          ? "The connection was interrupted. Your completed batches are safe and the import can be resumed."
+          : caught instanceof Error
+            ? caught.message
+            : "The workbook could not be imported.";
+      setError(
+        offset > 0
+          ? `${reason} ${offset} of ${preview.totals.products} products are complete. Select Resume import to continue.`
+          : reason,
+      );
       setPhase("ready");
     }
   }
@@ -350,6 +460,27 @@ export function ProductImportWorkflow() {
             )}
 
             <div className="border-t border-[#e6ebf0] bg-[#f7f9fb] p-5 sm:p-7">
+              {(phase === "importing" || processedProducts > 0) && phase !== "complete" && (
+                <div className="mb-5" aria-live="polite">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-[#526176]">
+                    <span>Import progress</span>
+                    <span>
+                      {processedProducts} of {preview.totals.products} products
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-[#dfe6ed]">
+                    <div
+                      className="h-full rounded-full bg-[#d51f2a] transition-[width] duration-300"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (processedProducts / preview.totals.products) * 100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex max-w-2xl gap-3">
                   <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#173d64]" />
@@ -373,7 +504,9 @@ export function ProductImportWorkflow() {
                   {phase === "complete"
                     ? "Import complete"
                     : phase === "importing"
-                    ? `Importing ${preview.totals.products} products…`
+                    ? `Importing ${processedProducts} of ${preview.totals.products}…`
+                    : resume && resume.offset > 0
+                    ? `Resume import (${resume.offset} of ${preview.totals.products})`
                     : `Import ${preview.totals.products} products as drafts`}
                 </button>
               </div>

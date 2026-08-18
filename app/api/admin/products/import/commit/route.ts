@@ -9,8 +9,23 @@ import {
 } from "@/lib/imports/product-workbook";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const maximumWorkbookSize = 5 * 1024 * 1024;
+const defaultBatchSize = 8;
+const maximumBatchSize = 20;
+
+function integerField(
+  formData: FormData,
+  field: string,
+  fallback: number,
+): number | null {
+  const value = formData.get(field);
+  if (value === null) return fallback;
+  if (typeof value !== "string" || !/^\d+$/.test(value)) return null;
+  const number = Number.parseInt(value, 10);
+  return Number.isSafeInteger(number) ? number : null;
+}
 
 export async function POST(request: NextRequest) {
   const profile = await getCurrentStaff();
@@ -38,6 +53,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "The workbook must be smaller than 5 MB." }, { status: 413 });
   }
 
+  const offset = integerField(formData, "offset", 0);
+  const requestedBatchSize = integerField(formData, "batchSize", defaultBatchSize);
+  if (
+    offset === null ||
+    requestedBatchSize === null ||
+    requestedBatchSize < 1 ||
+    requestedBatchSize > maximumBatchSize
+  ) {
+    return NextResponse.json({ message: "The import batch is invalid. Check the workbook again." }, { status: 400 });
+  }
+
   try {
     const parsed = parseProductWorkbook(await value.arrayBuffer());
     const errors = parsed.issues.filter((issue) => issue.severity === "error");
@@ -52,12 +78,23 @@ export async function POST(request: NextRequest) {
         { status: 422 },
       );
     }
+    if (offset >= parsed.products.length) {
+      return NextResponse.json(
+        { message: "The requested import position is outside this workbook." },
+        { status: 400 },
+      );
+    }
 
-    const result = await importProductWorkbook(parsed, profile);
-    revalidatePath("/admin");
-    revalidatePath("/admin/products");
-    revalidatePath("/products");
-    revalidatePath("/");
+    const result = await importProductWorkbook(parsed, profile, {
+      offset,
+      limit: requestedBatchSize,
+    });
+    if (result.progress.complete) {
+      revalidatePath("/admin");
+      revalidatePath("/admin/products");
+      revalidatePath("/products");
+      revalidatePath("/");
+    }
     return NextResponse.json(result, {
       status: result.failed.length > 0 ? 207 : 201,
     });
