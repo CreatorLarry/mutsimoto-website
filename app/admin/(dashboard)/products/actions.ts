@@ -150,6 +150,19 @@ async function uploadPrimaryImage(client: StaffSupabaseClient, productId: string
   if (productError) throw new Error("The product image could not be selected as primary.");
 }
 
+async function productHasImage(
+  client: StaffSupabaseClient,
+  productId: string,
+): Promise<boolean> {
+  const { data, error } = await client
+    .from("products")
+    .select("primary_image_url, product_images(id)")
+    .eq("id", productId)
+    .maybeSingle();
+  if (error || !data) throw new Error("The product image status could not be checked.");
+  return Boolean(data.primary_image_url || data.product_images?.length);
+}
+
 function parseRelatedData(input: ProductFormInput) {
   return {
     specifications: parseSpecifications(input.specifications),
@@ -182,7 +195,8 @@ export async function createProduct(formData: FormData): Promise<void> {
   }
 
   const client = await createClient();
-  const status = publicationStatus(input);
+  const requestedStatus = publicationStatus(input);
+  const status = requestedStatus === "published" ? "draft" : requestedStatus;
   const descriptions = catalogueDescriptions(input);
   const { data, error } = await client.from("products").insert({
     name: input.name,
@@ -199,7 +213,7 @@ export async function createProduct(formData: FormData): Promise<void> {
     seo_description: input.seoDescription || null,
     created_by: profile.id,
     updated_by: profile.id,
-    published_at: status === "published" ? new Date().toISOString() : null,
+    published_at: null,
   }).select("id").single();
 
   if (error || !data) {
@@ -222,6 +236,16 @@ export async function createProduct(formData: FormData): Promise<void> {
         input.imageAlt || `${input.name} ${input.partNumber} product image`,
         image,
       );
+    }
+    if (requestedStatus === "published") {
+      if (!(await productHasImage(client, String(data.id)))) {
+        throw new Error("The product was saved as a draft because no product image is attached.");
+      }
+      const { error: publishError } = await client
+        .from("products")
+        .update({ publication_status: "published", updated_by: profile.id })
+        .eq("id", String(data.id));
+      if (publishError) throw new Error("The product was saved as a draft but could not be published.");
     }
   } catch (saveError) {
     actionRedirect(`/admin/products/${data.id}/edit`, readableError(saveError));
@@ -250,7 +274,8 @@ export async function updateProduct(productId: string, formData: FormData): Prom
   }
 
   const client = await createClient();
-  const status = publicationStatus(input);
+  const requestedStatus = publicationStatus(input);
+  const status = requestedStatus === "published" ? "draft" : requestedStatus;
   const descriptions = catalogueDescriptions(input);
   const { data: previousProduct } = await client
     .from("products")
@@ -293,6 +318,16 @@ export async function updateProduct(productId: string, formData: FormData): Prom
         input.imageAlt || `${input.name} ${input.partNumber} product image`,
         image,
       );
+    }
+    if (requestedStatus === "published") {
+      if (!(await productHasImage(client, productId))) {
+        throw new Error("The product was saved as a draft because no product image is attached.");
+      }
+      const { error: publishError } = await client
+        .from("products")
+        .update({ publication_status: "published", updated_by: profile.id })
+        .eq("id", productId);
+      if (publishError) throw new Error("The product was saved as a draft but could not be published.");
     }
   } catch (saveError) {
     actionRedirect(editPath, readableError(saveError));
@@ -374,10 +409,31 @@ export async function bulkUpdateProducts(formData: FormData): Promise<void> {
   }
 
   const client = await createClient();
+  let targetIds = parsedIds.data;
+  let skippedMissingImages = 0;
+  if (field === "publication_status" && value === "published") {
+    const { data: imageStates, error: imageStateError } = await client
+      .from("products")
+      .select("id, primary_image_url, product_images(id)")
+      .in("id", parsedIds.data);
+    if (imageStateError) {
+      actionRedirect(returnPath, "The selected products could not be checked for images.");
+    }
+    targetIds = (imageStates ?? [])
+      .filter((product) => product.primary_image_url || product.product_images?.length)
+      .map((product) => String(product.id));
+    skippedMissingImages = parsedIds.data.length - targetIds.length;
+    if (targetIds.length === 0) {
+      actionRedirect(
+        returnPath,
+        "No products were published because every selected product is missing an image.",
+      );
+    }
+  }
   const { data, error } = await client
     .from("products")
     .update(updates)
-    .in("id", parsedIds.data)
+    .in("id", targetIds)
     .select("id");
 
   if (error) {
@@ -398,7 +454,11 @@ export async function bulkUpdateProducts(formData: FormData): Promise<void> {
   revalidatePath("/products");
   actionRedirect(
     returnPath,
-    `Updated ${changeLabel} for ${changedCount} ${changedCount === 1 ? "product" : "products"}.`,
+    `Updated ${changeLabel} for ${changedCount} ${changedCount === 1 ? "product" : "products"}.${
+      skippedMissingImages > 0
+        ? ` ${skippedMissingImages} ${skippedMissingImages === 1 ? "product was" : "products were"} kept as drafts because images are missing.`
+        : ""
+    }`,
   );
 }
 

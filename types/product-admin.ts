@@ -26,6 +26,7 @@ export interface AdminProductListItem {
   publicationStatus: ProductPublicationStatus;
   availability: string;
   featured: boolean;
+  hasImage: boolean;
   updatedAt: string;
 }
 

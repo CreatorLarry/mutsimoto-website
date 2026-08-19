@@ -13,6 +13,8 @@ interface ProductListRecord {
   publication_status: AdminProductListItem["publicationStatus"];
   availability: string;
   featured: boolean;
+  primary_image_url: string | null;
+  product_images: Array<{ id: string }>;
   updated_at: string;
 }
 
@@ -21,6 +23,24 @@ export interface AdminProductPage {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export interface AdminProductImageAuditItem {
+  id: string;
+  name: string;
+  partNumber: string;
+  category: AdminProductListItem["category"];
+  publicationStatus: AdminProductListItem["publicationStatus"];
+  availability: string;
+  updatedAt: string;
+}
+
+export interface AdminProductImageAudit {
+  products: AdminProductImageAuditItem[];
+  total: number;
+  published: number;
+  draft: number;
+  review: number;
 }
 
 interface SpecificationRecord { label: string; value: string; unit: string | null; display_order: number }
@@ -68,6 +88,7 @@ export async function getAdminProducts(
     status?: string;
     availability?: string;
     category?: string;
+    image?: string;
     page?: string | number;
   } = {},
 ): Promise<AdminProductPage> {
@@ -78,7 +99,7 @@ export async function getAdminProducts(
   const start = (page - 1) * pageSize;
   let request = supabase
     .from("products")
-    .select("id, name, part_number, category, publication_status, availability, featured, updated_at", { count: "exact" })
+    .select("id, name, part_number, category, publication_status, availability, featured, primary_image_url, updated_at, product_images!left(id)", { count: "exact" })
     .order("updated_at", { ascending: false })
     .range(start, start + pageSize - 1);
 
@@ -103,6 +124,9 @@ export async function getAdminProducts(
   if (["oil_element", "oil_spin_on", "fuel_elements", "fuel_spin_on", "air_cleaners"].includes(options.category ?? "")) {
     request = request.eq("category", options.category as "oil_element" | "oil_spin_on" | "fuel_elements" | "fuel_spin_on" | "air_cleaners");
   }
+  if (options.image === "missing") {
+    request = request.is("primary_image_url", null).is("product_images", null);
+  }
 
   const { data, error, count } = await request;
   if (error) throw new Error("Unable to load administration products.");
@@ -115,11 +139,55 @@ export async function getAdminProducts(
       publicationStatus: product.publication_status,
       availability: product.availability,
       featured: product.featured,
+      hasImage: Boolean(product.primary_image_url || product.product_images?.length),
       updatedAt: product.updated_at,
     })),
     total: count ?? 0,
     page,
     pageSize,
+  };
+}
+
+export async function getAdminProductImageAudit(): Promise<AdminProductImageAudit> {
+  const supabase = await createClient();
+  const pageSize = 1000;
+  const products: AdminProductImageAuditItem[] = [];
+
+  for (let start = 0; ; start += pageSize) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, name, part_number, category, publication_status, availability, updated_at, product_images!left(id)")
+      .is("primary_image_url", null)
+      .is("product_images", null)
+      .order("part_number", { ascending: true })
+      .range(start, start + pageSize - 1);
+    if (error) throw new Error("Unable to audit product images.");
+
+    const rows = (data ?? []) as unknown as Array<
+      Omit<ProductListRecord, "featured" | "primary_image_url"> & {
+        product_images: Array<{ id: string }>;
+      }
+    >;
+    products.push(
+      ...rows.map((product) => ({
+        id: product.id,
+        name: product.name,
+        partNumber: product.part_number,
+        category: normalizeProductCategoryKey(product.category),
+        publicationStatus: product.publication_status,
+        availability: product.availability,
+        updatedAt: product.updated_at,
+      })),
+    );
+    if (rows.length < pageSize) break;
+  }
+
+  return {
+    products,
+    total: products.length,
+    published: products.filter((product) => product.publicationStatus === "published").length,
+    draft: products.filter((product) => product.publicationStatus === "draft").length,
+    review: products.filter((product) => product.publicationStatus === "review").length,
   };
 }
 

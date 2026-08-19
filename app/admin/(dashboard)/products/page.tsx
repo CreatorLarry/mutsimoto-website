@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { FileSpreadsheet, Plus, Search } from "lucide-react";
+import { Download, FileSpreadsheet, ImageOff, Plus, Search } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductBulkTable } from "@/components/admin/product-bulk-table";
-import { getAdminProducts } from "@/lib/admin/products";
+import { getAdminProductImageAudit, getAdminProducts } from "@/lib/admin/products";
 import { hasPermission } from "@/lib/auth/permissions";
 import { requireStaff } from "@/lib/auth/session";
 import { productCategoryOptions } from "@/types/categories";
@@ -20,6 +20,7 @@ interface ProductsAdminPageProps {
     status?: string;
     availability?: string;
     category?: string;
+    image?: string;
     page?: string;
     message?: string;
   }>;
@@ -33,6 +34,7 @@ function productPageHref(params: ProductSearchParams, page: number): string {
   if (params.status) next.set("status", params.status);
   if (params.availability) next.set("availability", params.availability);
   if (params.category) next.set("category", params.category);
+  if (params.image) next.set("image", params.image);
   next.set("page", String(page));
   return `/admin/products?${next.toString()}`;
 }
@@ -40,13 +42,17 @@ function productPageHref(params: ProductSearchParams, page: number): string {
 export default async function ProductsAdminPage({ searchParams }: ProductsAdminPageProps) {
   const profile = await requireStaff("products:read");
   const params = await searchParams;
-  const data = await getAdminProducts({
-    query: params.query,
-    status: params.status,
-    availability: params.availability,
-    category: params.category,
-    page: params.page,
-  });
+  const [data, imageAudit] = await Promise.all([
+    getAdminProducts({
+      query: params.query,
+      status: params.status,
+      availability: params.availability,
+      category: params.category,
+      image: params.image,
+      page: params.page,
+    }),
+    getAdminProductImageAudit(),
+  ]);
   const pageCount = Math.max(1, Math.ceil(data.total / data.pageSize));
 
   if (data.total > 0 && data.page > pageCount) {
@@ -59,7 +65,9 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
   const firstProduct = data.total === 0 ? 0 : (data.page - 1) * data.pageSize + 1;
   const lastProduct = Math.min(data.page * data.pageSize, data.total);
   const returnPath = productPageHref(params, data.page);
-  const hasFilters = Boolean(params.query || params.status || params.availability || params.category);
+  const hasFilters = Boolean(
+    params.query || params.status || params.availability || params.category || params.image,
+  );
 
   return (
     <>
@@ -90,8 +98,53 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
         </p>
       )}
 
+      <section className="mt-7 grid gap-3 sm:grid-cols-3" aria-label="Product image audit">
+        {[
+          {
+            label: "Published without images",
+            value: imageAudit.published,
+            href: "/admin/products?status=published&image=missing",
+            exportStatus: "published",
+            tone: "border-[#efc8cc] bg-[#fff5f5] text-[#a52a35]",
+          },
+          {
+            label: "Drafts without images",
+            value: imageAudit.draft,
+            href: "/admin/products?status=draft&image=missing",
+            exportStatus: "draft",
+            tone: "border-[#eadcbf] bg-[#fffaf0] text-[#875d13]",
+          },
+          {
+            label: "All products without images",
+            value: imageAudit.total,
+            href: "/admin/products?image=missing",
+            exportStatus: "all",
+            tone: "border-[#d4e0eb] bg-[#f5f8fb] text-[#173b61]",
+          },
+        ].map((item) => (
+          <article key={item.label} className={`rounded-[18px] border p-5 ${item.tone}`}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.12em]">{item.label}</p>
+                <p className="mt-2 text-3xl font-black text-[#07172b]">{item.value}</p>
+              </div>
+              <ImageOff className="size-5" aria-hidden="true" />
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-[11px] font-black">
+              <Link href={item.href} className="hover:underline">Review products</Link>
+              <a
+                href={`/api/admin/products/image-audit?status=${item.exportStatus}`}
+                className="inline-flex items-center gap-1 hover:underline"
+              >
+                <Download className="size-3.5" /> Export CSV
+              </a>
+            </div>
+          </article>
+        ))}
+      </section>
+
       <form
-        className="mt-7 grid gap-3 rounded-[20px] border border-[#e0e6ed] bg-white p-4 shadow-[0_8px_28px_rgba(7,23,43,0.04)] md:grid-cols-2 xl:grid-cols-[minmax(280px,1fr)_170px_190px_170px_auto]"
+        className="mt-7 grid gap-3 rounded-[20px] border border-[#e0e6ed] bg-white p-4 shadow-[0_8px_28px_rgba(7,23,43,0.04)] md:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_160px_180px_160px_160px_auto]"
         action="/admin/products"
       >
         <label className="relative md:col-span-2 xl:col-span-1">
@@ -116,6 +169,17 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             <option value="draft">Draft</option>
             <option value="review">Under review</option>
             <option value="archived">Archived</option>
+          </select>
+        </label>
+        <label>
+          <span className="sr-only">Filter by product image</span>
+          <select
+            name="image"
+            defaultValue={params.image ?? ""}
+            className="h-12 w-full rounded-xl border border-[#dbe2ea] bg-white px-4 text-sm font-bold text-[#334257] outline-none focus:border-[#e52833]"
+          >
+            <option value="">All image states</option>
+            <option value="missing">Missing product image</option>
           </select>
         </label>
         <label>

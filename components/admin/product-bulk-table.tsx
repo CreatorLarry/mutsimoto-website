@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Archive, CheckSquare2, Edit3, Layers3 } from "lucide-react";
+import { Archive, CheckSquare2, Edit3, Image as ImageIcon, ImageOff, Layers3 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 import { DeleteAction } from "@/components/admin/delete-action";
 import { StatusBadge } from "@/components/admin/status-badge";
@@ -185,7 +185,7 @@ export function ProductBulkTable({
 
       <div className="mt-3 overflow-hidden rounded-[22px] border border-[#e0e6ed] bg-white shadow-[0_8px_28px_rgba(7,23,43,0.04)]">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1020px] text-left">
+          <table className="w-full min-w-[1120px] text-left">
             <thead className="bg-[#f3f6f9] text-[10px] font-black uppercase tracking-[0.11em] text-[#6a778a]">
               <tr>
                 {canEdit && (
@@ -203,6 +203,7 @@ export function ProductBulkTable({
                 <th className="px-4 py-4">Product</th>
                 <th className="px-4 py-4">Category</th>
                 <th className="px-4 py-4">Availability</th>
+                <th className="px-4 py-4">Image</th>
                 <th className="px-4 py-4">Status</th>
                 <th className="px-4 py-4">Updated</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -234,6 +235,22 @@ export function ProductBulkTable({
                       {productCategoryLabels[product.category]}
                     </td>
                     <td className="px-4 py-4 text-sm text-[#657184]">{product.availability}</td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] ${
+                          product.hasImage
+                            ? "bg-[#e8f4ef] text-[#28765b]"
+                            : "bg-[#fff0f1] text-[#a6323d]"
+                        }`}
+                      >
+                        {product.hasImage ? (
+                          <ImageIcon className="size-3" aria-hidden="true" />
+                        ) : (
+                          <ImageOff className="size-3" aria-hidden="true" />
+                        )}
+                        {product.hasImage ? "Attached" : "Missing"}
+                      </span>
+                    </td>
                     <td className="px-4 py-4"><StatusBadge status={product.publicationStatus} /></td>
                     <td className="px-4 py-4 text-xs text-[#748196]">
                       {new Date(product.updatedAt).toLocaleDateString("en-KE")}

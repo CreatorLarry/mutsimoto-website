@@ -95,6 +95,30 @@ export async function POST(request: NextRequest) {
   const failed: Array<{ id: string; message: string }> = [];
 
   for (const item of items) {
+    if (item.publish) {
+      const { data: imageState, error: imageStateError } = await client
+        .from("products")
+        .select("primary_image_url, product_images(id)")
+        .eq("id", item.id)
+        .maybeSingle();
+      if (imageStateError || !imageState) {
+        failed.push({ id: item.id, message: "The product image status could not be checked." });
+        continue;
+      }
+      const hasAttachedImage = Boolean(
+        item.primaryImagePath ||
+          imageState.primary_image_url ||
+          imageState.product_images?.length,
+      );
+      if (!hasAttachedImage) {
+        failed.push({
+          id: item.id,
+          message: "The product remains a draft because no product image is attached.",
+        });
+        continue;
+      }
+    }
+
     const payload: {
       updated_by: string;
       primary_image_url?: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -65,7 +66,22 @@ interface FinalizeResponse {
   failed: Array<{ id: string; message: string }>;
 }
 
+interface ImportIssueReportRow {
+  stage: string;
+  partNumber: string;
+  productName: string;
+  filename: string;
+  message: string;
+}
+
+interface StoredImportIssueReport {
+  createdAt: string;
+  sourceName: string;
+  rows: ImportIssueReportRow[];
+}
+
 const importBatchSize = 8;
+const importIssueReportKey = "mutsimoto-last-product-import-issues";
 const directoryPickerProps = {
   webkitdirectory: "",
   directory: "",
@@ -79,6 +95,99 @@ function formatBytes(bytes: number): string {
 
 function normalizedReference(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function csvCell(value: string): string {
+  return `"${value.replaceAll('"', '""')}"`;
+}
+
+function downloadIssueReport(report: StoredImportIssueReport) {
+  const rows = [
+    ["Stage", "Part number", "Product name", "Image filename", "Issue"],
+    ...report.rows.map((row) => [
+      row.stage,
+      row.partNumber,
+      row.productName,
+      row.filename,
+      row.message,
+    ]),
+  ];
+  const csv = `\uFEFF${rows.map((row) => row.map(csvCell).join(",")).join("\r\n")}`;
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  const date = report.createdAt.slice(0, 10);
+  anchor.href = url;
+  anchor.download = `mutsimoto-product-import-issues-${date}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function storedIssueReport(value: unknown): StoredImportIssueReport | null {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("createdAt" in value) ||
+    typeof value.createdAt !== "string" ||
+    !("sourceName" in value) ||
+    typeof value.sourceName !== "string" ||
+    !("rows" in value) ||
+    !Array.isArray(value.rows)
+  ) {
+    return null;
+  }
+  const rows = value.rows.filter(
+    (row): row is ImportIssueReportRow =>
+      typeof row === "object" &&
+      row !== null &&
+      "stage" in row &&
+      typeof row.stage === "string" &&
+      "partNumber" in row &&
+      typeof row.partNumber === "string" &&
+      "productName" in row &&
+      typeof row.productName === "string" &&
+      "filename" in row &&
+      typeof row.filename === "string" &&
+      "message" in row &&
+      typeof row.message === "string",
+  );
+  return rows.length === value.rows.length
+    ? { createdAt: value.createdAt, sourceName: value.sourceName, rows }
+    : null;
+}
+
+function importIssueRows(
+  result: ProductImportCommitResult | null,
+  outcome: ImportOutcome | null,
+): ImportIssueReportRow[] {
+  if (!result) return [];
+  const products = new Map(result.products.map((product) => [product.id, product]));
+  return [
+    ...result.failed.map((failure) => ({
+      stage: "Product import",
+      partNumber: failure.partNumber,
+      productName: failure.name,
+      filename: "",
+      message: failure.message,
+    })),
+    ...(outcome?.imageFailures ?? []).map((failure) => ({
+      stage: "Image upload",
+      partNumber: failure.partNumber,
+      productName:
+        result.products.find(
+          (product) => product.normalizedPartNumber === normalizedReference(failure.partNumber),
+        )?.name ?? "",
+      filename: failure.filename,
+      message: failure.message,
+    })),
+    ...(outcome?.finalizationFailures ?? []).map((failure) => ({
+      stage: "Publication",
+      partNumber: products.get(failure.id)?.partNumber ?? "",
+      productName: products.get(failure.id)?.name ?? "",
+      filename: "",
+      message: failure.message,
+    })),
+  ];
 }
 
 function messageFromResponse(value: unknown, fallback: string): string {
@@ -175,6 +284,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
   const [processedImages, setProcessedImages] = useState(0);
   const [publishImmediately, setPublishImmediately] = useState(false);
   const [outcome, setOutcome] = useState<ImportOutcome | null>(null);
+  const [lastIssueReport, setLastIssueReport] = useState<StoredImportIssueReport | null>(null);
   const [error, setError] = useState("");
   const busy = ["preparing", "previewing", "importing", "uploading", "publishing"].includes(
     phase,
@@ -190,6 +300,20 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
       imageMatch.duplicates.length === 0 &&
       imageMatch.invalid.length === 0);
   const readyToImport = Boolean(preview?.valid && imagesReady);
+  const issueRows = useMemo(() => importIssueRows(result, outcome), [outcome, result]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const saved = window.localStorage.getItem(importIssueReportKey);
+        if (!saved) return;
+        setLastIssueReport(storedIssueReport(JSON.parse(saved) as unknown));
+      } catch {
+        window.localStorage.removeItem(importIssueReportKey);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   function resetImportState() {
     setPreview(null);
@@ -398,7 +522,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
         blockedPartNumbers,
       );
 
-      setResult({
+      const completedResult: ProductImportCommitResult = {
         created,
         updated,
         failed,
@@ -413,13 +537,29 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
           nextOffset: null,
           complete: true,
         },
-      });
-      setOutcome({
+      };
+      const completedOutcome: ImportOutcome = {
         imagesUploaded: imageResult.uploaded,
         imageFailures: imageResult.failures,
         published: finalized.published,
         finalizationFailures: finalized.failed,
-      });
+      };
+      setResult(completedResult);
+      setOutcome(completedOutcome);
+      const completedIssueRows = importIssueRows(completedResult, completedOutcome);
+      if (completedIssueRows.length > 0) {
+        const report: StoredImportIssueReport = {
+          createdAt: new Date().toISOString(),
+          sourceName: sourceName || file.name,
+          rows: completedIssueRows,
+        };
+        setLastIssueReport(report);
+        try {
+          window.localStorage.setItem(importIssueReportKey, JSON.stringify(report));
+        } catch {
+          // The on-screen and downloadable report remains available for this session.
+        }
+      }
       setResume(null);
       setPhase("complete");
     } catch (caught) {
@@ -925,10 +1065,25 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
             )}
 
             {outcome && outcome.finalizationFailures.length > 0 && (
-              <p className="mt-5 rounded-xl border border-[#ead6b7] bg-white px-4 py-3 text-xs leading-5 text-[#7a5c2d]">
-                {outcome.finalizationFailures.length} products could not be finalized and
-                remain as drafts. Running the same package again is safe.
-              </p>
+              <div className="mt-5 rounded-2xl border border-[#ead6b7] bg-white p-4">
+                <p className="text-xs font-black text-[#8a5a16]">
+                  {outcome.finalizationFailures.length} products could not be published and
+                  remain as drafts.
+                </p>
+                <div className="mt-3 space-y-1 text-xs text-[#7a5c2d]">
+                  {outcome.finalizationFailures.slice(0, 20).map((failure) => {
+                    const product = result.products.find((item) => item.id === failure.id);
+                    return (
+                      <p key={failure.id}>
+                        {product?.partNumber ?? failure.id} · {product?.name ?? "Product"}: {failure.message}
+                      </p>
+                    );
+                  })}
+                  {outcome.finalizationFailures.length > 20 && (
+                    <p>…and {outcome.finalizationFailures.length - 20} more publication issues.</p>
+                  )}
+                </div>
+              </div>
             )}
 
             {(result.mediaPending.images > 0 || result.mediaPending.technicalSheets > 0) && (
@@ -946,6 +1101,21 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
               >
                 View imported products <ArrowRight className="size-4" />
               </Link>
+              {issueRows.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadIssueReport({
+                      createdAt: new Date().toISOString(),
+                      sourceName: sourceName || file?.name || "Product workbook",
+                      rows: issueRows,
+                    })
+                  }
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#d9c394] bg-white px-5 text-sm font-black text-[#7a5418] hover:bg-[#fff8e8]"
+                >
+                  <Download className="size-4" /> Download issue report
+                </button>
+              )}
               <button
                 type="button"
                 onClick={startAgain}
@@ -959,6 +1129,37 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
       </div>
 
       <aside className="space-y-5">
+        {lastIssueReport && (
+          <section className="rounded-[22px] border border-[#ead6b7] bg-[#fffaf0] p-6 shadow-[0_8px_28px_rgba(7,23,43,0.04)]">
+            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#9a6719]">
+              Saved import report
+            </p>
+            <h2 className="mt-2 text-lg font-black text-[#07172b]">
+              {lastIssueReport.rows.length} items need attention
+            </h2>
+            <p className="mt-2 text-xs leading-5 text-[#725d3b]">
+              {lastIssueReport.sourceName} · {new Date(lastIssueReport.createdAt).toLocaleString("en-KE")}
+            </p>
+            <button
+              type="button"
+              onClick={() => downloadIssueReport(lastIssueReport)}
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#8a5a16] px-5 text-sm font-black text-white hover:bg-[#70480f]"
+            >
+              <Download className="size-4" /> Download issue CSV
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.localStorage.removeItem(importIssueReportKey);
+                setLastIssueReport(null);
+              }}
+              className="mt-2 inline-flex min-h-10 w-full items-center justify-center text-xs font-black text-[#7a5c2d] hover:underline"
+            >
+              Clear saved report
+            </button>
+          </section>
+        )}
+
         <section className="rounded-[22px] border border-[#dce3eb] bg-[#07172b] p-6 text-white shadow-[0_12px_32px_rgba(7,23,43,0.12)]">
           <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-[#ff5660]">
             <Download className="size-5" />
@@ -985,6 +1186,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
               "The workbook is validated before database changes.",
               "Part numbers decide whether a product is created or updated.",
               "Actual images must match the filenames listed in the workbook.",
+              "Products without attached images remain as drafts.",
               "Immediate publishing is restricted to authorised staff.",
             ].map((text, index) => (
               <li key={text} className="flex gap-3 text-xs leading-5 text-[#526176]">
