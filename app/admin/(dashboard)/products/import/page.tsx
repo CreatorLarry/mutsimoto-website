@@ -2,17 +2,18 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductImportWorkflow } from "@/components/admin/product-import-workflow";
+import { hasPermission } from "@/lib/auth/permissions";
 import { requireStaff } from "@/lib/auth/session";
 
 export default async function ProductImportPage() {
-  await requireStaff("products:write");
+  const profile = await requireStaff("products:write");
 
   return (
     <>
       <AdminPageHeader
         eyebrow="Catalogue operations"
         title="Import product workbook"
-        description="Check a completed Mutsimoto XLSX template, review every validation message, and create or update product drafts in one controlled workflow."
+        description="Import a Mutsimoto workbook and its product images together, then save as drafts or publish immediately when authorised."
         actions={
           <Link
             href="/admin/products"
@@ -22,7 +23,7 @@ export default async function ProductImportPage() {
           </Link>
         }
       />
-      <ProductImportWorkflow />
+      <ProductImportWorkflow canPublish={hasPermission(profile, "products:publish")} />
     </>
   );
 }

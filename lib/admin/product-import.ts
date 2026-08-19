@@ -191,7 +191,7 @@ async function saveProduct(
   client: StaffSupabaseClient,
   profile: StaffProfile,
   product: ImportedProduct,
-): Promise<"created" | "updated"> {
+): Promise<{ action: "created" | "updated"; id: string }> {
   const { data: existing, error: lookupError } = await client
     .from("products")
     .select("id")
@@ -239,7 +239,7 @@ async function saveProduct(
 
   if (!productId) throw new Error("The saved product could not be identified.");
   await replaceRelatedData(client, productId, product);
-  return existingId ? "updated" : "created";
+  return { action: existingId ? "updated" : "created", id: productId };
 }
 
 export async function importProductWorkbook(
@@ -254,6 +254,7 @@ export async function importProductWorkbook(
     created: 0,
     updated: 0,
     failed: [],
+    products: [],
     mediaPending: {
       images: parsed.totals.images,
       technicalSheets: parsed.totals.technicalSheets,
@@ -268,8 +269,14 @@ export async function importProductWorkbook(
 
   for (const product of products) {
     try {
-      const action = await saveProduct(client, profile, product);
-      result[action] += 1;
+      const saved = await saveProduct(client, profile, product);
+      result[saved.action] += 1;
+      result.products.push({
+        id: saved.id,
+        partNumber: product.partNumber,
+        normalizedPartNumber: product.normalizedPartNumber,
+        name: product.name,
+      });
     } catch (error) {
       result.failed.push({
         partNumber: product.partNumber,

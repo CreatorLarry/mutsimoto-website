@@ -108,6 +108,13 @@ export interface ProductImportPreview {
   issues: ProductImportIssue[];
   hiddenIssueCount: number;
   sampleProducts: ProductImportSample[];
+  imageManifest: ProductImportImageManifestEntry[];
+}
+
+export interface ProductImportImageManifestEntry extends ImportedImageManifestItem {
+  partNumber: string;
+  normalizedPartNumber: string;
+  productName: string;
 }
 
 export interface ProductImportFailure {
@@ -116,10 +123,18 @@ export interface ProductImportFailure {
   message: string;
 }
 
+export interface ProductImportCommitProduct {
+  id: string;
+  partNumber: string;
+  normalizedPartNumber: string;
+  name: string;
+}
+
 export interface ProductImportCommitResult {
   created: number;
   updated: number;
   failed: ProductImportFailure[];
+  products: ProductImportCommitProduct[];
   mediaPending: {
     images: number;
     technicalSheets: number;

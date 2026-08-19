@@ -898,6 +898,14 @@ export function createProductImportPreview(
     warningCount,
     issues: visibleIssues,
     hiddenIssueCount: Math.max(0, parsed.issues.length - visibleIssues.length),
+    imageManifest: parsed.products.flatMap((product) =>
+      product.images.map((image) => ({
+        ...image,
+        partNumber: product.partNumber,
+        normalizedPartNumber: product.normalizedPartNumber,
+        productName: product.name,
+      })),
+    ),
     sampleProducts: parsed.products.slice(0, 10).map((product) => ({
       partNumber: product.partNumber,
       name: product.name,
