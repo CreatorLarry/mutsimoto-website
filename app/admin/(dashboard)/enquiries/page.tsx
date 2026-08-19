@@ -1,9 +1,11 @@
-import { Mail, MapPin, PackageSearch, Phone, Search } from "lucide-react";
+import Image from "next/image";
+import { Camera, Mail, MapPin, PackageSearch, Phone, Search } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { DeleteAction } from "@/components/admin/delete-action";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { enquiryStatuses, getAdminEnquiries } from "@/lib/admin/enquiries";
 import { requireStaff } from "@/lib/auth/session";
+import { filterRequestKindLabels } from "@/lib/enquiries/filter-request";
 import { deleteEnquiry, updateEnquiryStatus } from "./actions";
 
 interface EnquiriesAdminPageProps {
@@ -46,6 +48,7 @@ export default async function EnquiriesAdminPage({ searchParams }: EnquiriesAdmi
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-3">
                   <StatusBadge status={enquiry.status} />
+                  {enquiry.requestKind && <span className="rounded-full border border-[#efc6ca] bg-[#fff1f2] px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.08em] text-[#b52430]">{filterRequestKindLabels[enquiry.requestKind]}</span>}
                   <span className="font-mono text-xs font-black text-[#526176]">{enquiry.enquiryNumber}</span>
                   <span className="text-xs text-[#8793a4]">{new Date(enquiry.createdAt).toLocaleString("en-KE")}</span>
                 </div>
@@ -53,8 +56,8 @@ export default async function EnquiriesAdminPage({ searchParams }: EnquiriesAdmi
                   {enquiry.customerName}{enquiry.companyName ? <span className="font-medium text-[#68768a]"> · {enquiry.companyName}</span> : null}
                 </h2>
                 <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-[#5f6e82]">
-                  <a href={`mailto:${enquiry.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d51f2a]"><Mail className="size-3.5" />{enquiry.email}</a>
-                  <a href={`tel:${enquiry.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d51f2a]"><Phone className="size-3.5" />{enquiry.phone}</a>
+                  {enquiry.email && <a href={`mailto:${enquiry.email}`} className="inline-flex items-center gap-1.5 hover:text-[#d51f2a]"><Mail className="size-3.5" />{enquiry.email}</a>}
+                  {enquiry.phone && <a href={`tel:${enquiry.phone}`} className="inline-flex items-center gap-1.5 hover:text-[#d51f2a]"><Phone className="size-3.5" />{enquiry.phone}</a>}
                   {enquiry.branchName && <span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5" />{enquiry.branchName}</span>}
                 </div>
                 {(enquiry.productName || enquiry.partNumber) && (
@@ -64,6 +67,12 @@ export default async function EnquiriesAdminPage({ searchParams }: EnquiriesAdmi
                   </p>
                 )}
                 <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[#526176]">{enquiry.message}</p>
+                {enquiry.attachmentUrl && (
+                  <a href={enquiry.attachmentUrl} target="_blank" rel="noreferrer" className="mt-5 block max-w-sm overflow-hidden rounded-2xl border border-[#d9e0e7] bg-[#f4f6f8] p-2 transition hover:border-[#e52833]">
+                    <span className="mb-2 flex items-center gap-2 px-2 pt-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#526176]"><Camera className="size-4 text-[#d51f2a]" /> Customer filter photo · Open full size</span>
+                    <Image src={enquiry.attachmentUrl} alt={`Customer attachment for ${enquiry.enquiryNumber}`} width={720} height={480} unoptimized className="h-56 w-full rounded-xl bg-white object-contain" />
+                  </a>
+                )}
               </div>
 
               <div className="flex shrink-0 flex-col items-stretch gap-2 sm:flex-row sm:items-end">

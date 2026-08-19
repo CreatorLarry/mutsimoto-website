@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireStaff } from "@/lib/auth/session";
 import { enquiryStatuses } from "@/lib/admin/enquiries";
+import { extractAttachmentPath, filterRequestAttachmentBucket } from "@/lib/enquiries/filter-request";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -57,7 +58,7 @@ export async function deleteEnquiry(formData: FormData): Promise<never> {
   const supabase = await createClient();
   const { data: enquiry, error: findError } = await supabase
     .from("enquiries")
-    .select("enquiry_number, customer_name")
+    .select("enquiry_number, customer_name, message")
     .eq("id", parsed.data.enquiryId)
     .maybeSingle();
   if (findError || !enquiry) redirect("/admin/enquiries?message=The%20selected%20enquiry%20could%20not%20be%20found");
@@ -74,6 +75,11 @@ export async function deleteEnquiry(formData: FormData): Promise<never> {
   }
 
   const admin = createAdminClient();
+  const attachmentPath = extractAttachmentPath(String(enquiry.message));
+  if (attachmentPath) {
+    const { error: attachmentError } = await admin.storage.from(filterRequestAttachmentBucket).remove([attachmentPath]);
+    if (attachmentError) console.error("[admin:enquiry-attachment-delete]", { message: attachmentError.message });
+  }
   const { error: auditError } = await admin.from("audit_logs").insert({
     user_id: profile.id,
     action: "enquiries_delete",

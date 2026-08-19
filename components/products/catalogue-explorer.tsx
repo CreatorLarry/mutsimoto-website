@@ -224,7 +224,7 @@ export function CatalogueExplorer({
               )}
             </>
           ) : (
-            <EmptySearchState onReset={reset} />
+            <EmptySearchState key={query} onReset={reset} initialQuery={query} />
           )}
         </div>
       </div>
