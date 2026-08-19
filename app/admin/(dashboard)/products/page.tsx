@@ -144,10 +144,10 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
       </section>
 
       <form
-        className="mt-7 grid gap-3 rounded-[20px] border border-[#e0e6ed] bg-white p-4 shadow-[0_8px_28px_rgba(7,23,43,0.04)] md:grid-cols-2 xl:grid-cols-[minmax(260px,1fr)_160px_180px_160px_160px_auto]"
+        className="mt-7 flex flex-wrap gap-3 rounded-[20px] border border-[#e0e6ed] bg-white p-4 shadow-[0_8px_28px_rgba(7,23,43,0.04)]"
         action="/admin/products"
       >
-        <label className="relative md:col-span-2 xl:col-span-1">
+        <label className="relative w-full min-w-0 lg:w-auto lg:flex-[2_1_280px]">
           <span className="sr-only">Search products</span>
           <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#8390a2]" />
           <input
@@ -157,7 +157,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             className="h-12 w-full rounded-xl border border-[#dbe2ea] bg-white pl-11 pr-4 text-sm text-[#17283d] outline-none placeholder:text-[#7c899b] focus:border-[#e52833]"
           />
         </label>
-        <label>
+        <label className="w-full min-w-0 sm:w-auto sm:flex-[1_1_170px]">
           <span className="sr-only">Filter by publication status</span>
           <select
             name="status"
@@ -171,7 +171,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             <option value="archived">Archived</option>
           </select>
         </label>
-        <label>
+        <label className="w-full min-w-0 sm:w-auto sm:flex-[1_1_170px]">
           <span className="sr-only">Filter by product image</span>
           <select
             name="image"
@@ -182,7 +182,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             <option value="missing">Missing product image</option>
           </select>
         </label>
-        <label>
+        <label className="w-full min-w-0 sm:w-auto sm:flex-[1_1_170px]">
           <span className="sr-only">Filter by availability</span>
           <select
             name="availability"
@@ -195,7 +195,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             ))}
           </select>
         </label>
-        <label>
+        <label className="w-full min-w-0 sm:w-auto sm:flex-[1_1_170px]">
           <span className="sr-only">Filter by category</span>
           <select
             name="category"
@@ -208,7 +208,7 @@ export default async function ProductsAdminPage({ searchParams }: ProductsAdminP
             ))}
           </select>
         </label>
-        <div className="flex gap-2">
+        <div className="flex w-full min-w-0 gap-2 sm:w-auto sm:flex-[1_1_200px]">
           <button type="submit" className="button-dark flex-1">Apply filters</button>
           {hasFilters && (
             <Link
