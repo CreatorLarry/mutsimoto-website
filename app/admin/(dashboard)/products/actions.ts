@@ -133,7 +133,7 @@ async function uploadPrimaryImage(client: StaffSupabaseClient, productId: string
   if (altText.trim().length < 3) throw new Error("Add descriptive alt text for the product image.");
 
   const storagePath = `${productId}/${crypto.randomUUID()}.${extension}`;
-  const { error: uploadError } = await client.storage.from("product-images").upload(storagePath, file, { cacheControl: "3600", contentType: file.type, upsert: false });
+  const { error: uploadError } = await client.storage.from("product-images").upload(storagePath, file, { cacheControl: "31536000", contentType: file.type, upsert: false });
   if (uploadError) throw new Error("The product image could not be uploaded.");
 
   const { data: previousPrimary } = await client.from("product_images").select("id").eq("product_id", productId).eq("is_primary", true).maybeSingle();

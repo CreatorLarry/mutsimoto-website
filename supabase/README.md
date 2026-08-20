@@ -18,7 +18,11 @@ Run the SQL files in this order using the Supabase SQL editor:
 3. `migrations/202607230001_product_categories.sql`
 4. `migrations/202607240001_catalogue_integration.sql`
 5. `migrations/202607250001_leadership_images.sql`
-6. `seed.sql`
+6. `migrations/202607300001_audit_log_details.sql`
+7. `migrations/202607310001_retain_company_branches.sql`
+8. `migrations/202608190001_filter_request_attachments.sql`
+9. `migrations/202608200001_public_product_images.sql`
+10. `seed.sql`
 
 The seed is repeatable and provides twelve clearly marked demo products plus the four branch records. Product fitment and technical values must be reviewed before production use.
 
@@ -56,4 +60,4 @@ There is intentionally no public staff registration page. Additional staff accou
 4. Confirm that it appears on `/products` and its dynamic product route works.
 5. Submit `/contact`, then update the resulting enquiry in `/admin/enquiries`.
 
-The private `product-images` and `technical-sheets` buckets are created by the security migration. Public visitors receive time-limited signed URLs only for published product assets.
+The `product-images` bucket is public so catalogue photos use stable, highly cacheable URLs. Product image uploads, changes, and deletions remain restricted to authorized staff. Technical sheets remain private and public visitors receive time-limited links for published product assets.

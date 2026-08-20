@@ -53,6 +53,7 @@ interface ProductRecord {
   technical_sheet_url: string | null;
   seo_title: string | null;
   seo_description: string | null;
+  updated_at: string;
   product_images: ProductImageRecord[];
   specifications: SpecificationRecord[];
   oem_references: ReferenceRecord[];
@@ -63,7 +64,7 @@ interface ProductRecord {
 const publicProductSelect = `
   id, slug, name, part_number, category, short_description, full_description,
   application_type, availability, featured, publication_status,
-  primary_image_url, technical_sheet_url, seo_title, seo_description,
+  primary_image_url, technical_sheet_url, seo_title, seo_description, updated_at,
   product_images(storage_path, alt_text, display_order, is_primary),
   specifications(label, value, unit, display_order),
   oem_references(reference_number),
@@ -85,15 +86,14 @@ const applicationLabels: Record<ProductRecord["application_type"], ApplicationTy
 };
 
 async function signedPathMap(
-  bucket: "product-images" | "technical-sheets",
+  bucket: "technical-sheets",
   paths: string[],
 ): Promise<Map<string, string>> {
   const uniquePaths = [...new Set(paths.filter((path) => path && !path.startsWith("/") && !path.startsWith("http")))];
   if (uniquePaths.length === 0) return new Map();
 
-  // Public catalogue data is already limited to published products. Sign its
-  // private media on the server so image visibility never depends on a
-  // visitor having an authenticated staff session.
+  // Technical sheets remain private and receive short-lived links only when a
+  // published product is rendered.
   const supabase = isSupabaseSecretConfigured()
     ? createAdminClient()
     : await createClient();
@@ -104,17 +104,34 @@ async function signedPathMap(
   return new Map(signed.filter((entry): entry is readonly [string, string] => entry !== null));
 }
 
-function directOrSigned(path: string | null, signed: Map<string, string>, fallback: string): string {
+async function publicProductImageMap(paths: string[]): Promise<Map<string, string>> {
+  const uniquePaths = [...new Set(paths.filter((path) => path && !path.startsWith("/") && !path.startsWith("http")))];
+  if (uniquePaths.length === 0) return new Map();
+
+  const supabase = await createClient();
+  return new Map(uniquePaths.map((path) => [
+    path,
+    supabase.storage.from("product-images").getPublicUrl(path).data.publicUrl,
+  ]));
+}
+
+function directOrResolved(path: string | null, resolved: Map<string, string>, fallback: string): string {
   if (!path) return fallback;
   if (path.startsWith("/") || path.startsWith("http")) return path;
-  return signed.get(path) ?? fallback;
+  return resolved.get(path) ?? fallback;
+}
+
+function versionedPublicImage(path: string | null, resolved: Map<string, string>, version: string, fallback: string): string {
+  const url = directOrResolved(path, resolved, fallback);
+  if (!path || path.startsWith("/") || path.startsWith("http") || url === fallback) return url;
+  return `${url}?v=${encodeURIComponent(version)}`;
 }
 
 async function mapProductRecords(records: ProductRecord[]): Promise<Product[]> {
   const imagePaths = records.flatMap((record) => [record.primary_image_url ?? "", ...(record.product_images ?? []).map((image) => image.storage_path)]);
   const sheetPaths = records.map((record) => record.technical_sheet_url ?? "");
-  const [signedImages, signedSheets] = await Promise.all([
-    signedPathMap("product-images", imagePaths),
+  const [publicImages, signedSheets] = await Promise.all([
+    publicProductImageMap(imagePaths),
     signedPathMap("technical-sheets", sheetPaths),
   ]);
 
@@ -122,7 +139,7 @@ async function mapProductRecords(records: ProductRecord[]): Promise<Product[]> {
     const categoryKey = normalizeProductCategoryKey(record.category);
     const fallbackImage = `${categoryKey}-filter`;
     const orderedImages = [...(record.product_images ?? [])].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.display_order - b.display_order);
-    const imageUrls = orderedImages.map((image) => directOrSigned(image.storage_path, signedImages, fallbackImage));
+    const imageUrls = orderedImages.map((image) => versionedPublicImage(image.storage_path, publicImages, record.updated_at, fallbackImage));
     const vehicleBrands = [...new Set((record.product_vehicle_applications ?? []).map((application) => application.vehicle_models?.vehicle_brands?.name).filter((value): value is string => Boolean(value)))];
     const vehicleModels = [...new Set((record.product_vehicle_applications ?? []).map((application) => application.vehicle_models?.name).filter((value): value is string => Boolean(value)))];
     const engineModels = [...new Set([
@@ -144,13 +161,13 @@ async function mapProductRecords(records: ProductRecord[]): Promise<Product[]> {
       engineModels,
       equipmentTypes,
       oemNumbers: (record.oem_references ?? []).map((reference) => reference.reference_number),
-      image: directOrSigned(record.primary_image_url, signedImages, imageUrls[0] ?? fallbackImage),
+      image: versionedPublicImage(record.primary_image_url, publicImages, record.updated_at, imageUrls[0] ?? fallbackImage),
       images: imageUrls.length > 0 ? imageUrls : undefined,
       specifications: [...(record.specifications ?? [])].sort((a, b) => a.display_order - b.display_order).map((specification) => ({ label: specification.label, value: [specification.value, specification.unit].filter(Boolean).join(" ") })),
       availability: record.availability,
       featured: record.featured,
       publicationStatus: record.publication_status,
-      technicalSheetUrl: record.technical_sheet_url ? directOrSigned(record.technical_sheet_url, signedSheets, "") : undefined,
+      technicalSheetUrl: record.technical_sheet_url ? directOrResolved(record.technical_sheet_url, signedSheets, "") : undefined,
       seoTitle: record.seo_title ?? undefined,
       seoDescription: record.seo_description ?? undefined,
     };
