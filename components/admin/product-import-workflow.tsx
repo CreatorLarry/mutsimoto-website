@@ -384,7 +384,10 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
       .map((product) => ({
         id: product.id,
         primaryImagePath: primaryImages.get(product.id) ?? null,
-        publish: publishImmediately && !blockedPartNumbers.has(product.normalizedPartNumber),
+        publish:
+          publishImmediately &&
+          product.action === "updated" &&
+          !blockedPartNumbers.has(product.normalizedPartNumber),
       }))
       .filter((item) => item.primaryImagePath || item.publish);
     let published = 0;
@@ -452,7 +455,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
     if (
       publishImmediately &&
       !window.confirm(
-        `Import and publish ${preview.totals.products} products after their images are uploaded?`,
+        `Import ${preview.totals.products} products and publish eligible existing-product updates after their images are uploaded? New products will remain drafts.`,
       )
     ) {
       return;
@@ -933,8 +936,8 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
                     className="mt-0.5 size-4 accent-[#d51f2a]"
                   />
                   <span>
-                    Publish successfully imported products immediately after their images
-                    are uploaded. Products with import or image failures stay as drafts.
+                    Publish eligible product updates after their images are uploaded. New
+                    part numbers are always saved as drafts for review.
                   </span>
                 </label>
               )}
@@ -943,8 +946,8 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
                   <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#173d64]" />
                   <p className="text-xs leading-6 text-[#526176]">
                     Matching part numbers are updated and new part numbers are created.
-                    Matched images upload directly to protected product storage before the
-                    selected publication option is applied.
+                    Existing publication status is preserved during updates. New products
+                    remain drafts, and images upload before any eligible update is published.
                   </p>
                 </div>
                 <button
@@ -969,8 +972,8 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
                           : resume && resume.offset > 0
                             ? `Resume import (${resume.offset} of ${preview.totals.products})`
                             : publishImmediately
-                              ? `Import and publish ${preview.totals.products} products`
-                              : `Import ${preview.totals.products} products as drafts`}
+                              ? `Import and publish eligible updates`
+                              : `Import ${preview.totals.products} products safely`}
                 </button>
               </div>
             </div>
@@ -1007,8 +1010,8 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
                   (outcome?.imageFailures.length ?? 0) === 0 &&
                   (outcome?.finalizationFailures.length ?? 0) === 0
                     ? publishImmediately
-                      ? "The products and their images are now live in the public catalogue."
-                      : "The products and their images are saved as drafts for review."
+                      ? "Existing products were updated in place and eligible updates are live. New products remain drafts for review."
+                      : "Existing product publication status was preserved, and new products were saved as drafts for review."
                     : "Some products or images need attention. Correct the reported items and safely run the same package again."}
                 </p>
               </div>
@@ -1049,7 +1052,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
               <div className="mt-5 rounded-2xl border border-[#ead6b7] bg-white p-4">
                 <p className="text-xs font-black text-[#8a5a16]">
                   {outcome.imageFailures.length} images could not be completed. Their
-                  products remain drafts.
+                  current product publication status was preserved.
                 </p>
                 <div className="mt-3 space-y-1 text-xs text-[#7a5c2d]">
                   {outcome.imageFailures.slice(0, 20).map((failure, index) => (
@@ -1068,7 +1071,7 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
               <div className="mt-5 rounded-2xl border border-[#ead6b7] bg-white p-4">
                 <p className="text-xs font-black text-[#8a5a16]">
                   {outcome.finalizationFailures.length} products could not be published and
-                  remain as drafts.
+                  kept their current publication status.
                 </p>
                 <div className="mt-3 space-y-1 text-xs text-[#7a5c2d]">
                   {outcome.finalizationFailures.slice(0, 20).map((failure) => {
@@ -1185,8 +1188,9 @@ export function ProductImportWorkflow({ canPublish }: { canPublish: boolean }) {
             {[
               "The workbook is validated before database changes.",
               "Part numbers decide whether a product is created or updated.",
+              "Existing products keep their publication status unless an authorised publish option succeeds.",
+              "New part numbers are always created as drafts for review.",
               "Actual images must match the filenames listed in the workbook.",
-              "Products without attached images remain as drafts.",
               "Immediate publishing is restricted to authorised staff.",
             ].map((text, index) => (
               <li key={text} className="flex gap-3 text-xs leading-5 text-[#526176]">

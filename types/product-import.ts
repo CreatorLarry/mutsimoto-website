@@ -128,6 +128,7 @@ export interface ProductImportCommitProduct {
   partNumber: string;
   normalizedPartNumber: string;
   name: string;
+  action: "created" | "updated";
 }
 
 export interface ProductImportCommitResult {

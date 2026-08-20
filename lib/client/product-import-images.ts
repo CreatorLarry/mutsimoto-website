@@ -138,18 +138,28 @@ export async function uploadProductImportImages(options: {
       } else {
         const contentType = imageContentTypes[imageExtension(entry.filename)];
         const storagePath = `${product.id}/catalogue-import/${safeStorageName(entry.filename)}`;
-        const { error } = await supabase.storage
-          .from("product-images")
-          .upload(storagePath, file, {
-            cacheControl: "3600",
-            contentType,
-            upsert: true,
-          });
-        if (error) {
+        let uploadFailed = true;
+        for (let attempt = 1; attempt <= 3; attempt += 1) {
+          const { error } = await supabase.storage
+            .from("product-images")
+            .upload(storagePath, file, {
+              cacheControl: "3600",
+              contentType,
+              upsert: true,
+            });
+          if (!error) {
+            uploadFailed = false;
+            break;
+          }
+          if (attempt < 3) {
+            await new Promise((resolve) => window.setTimeout(resolve, attempt * 300));
+          }
+        }
+        if (uploadFailed) {
           failures.push({
             partNumber: entry.partNumber,
             filename: entry.filename,
-            message: "The image could not be uploaded to product storage.",
+            message: "The image could not be uploaded to product storage after three attempts.",
           });
         } else {
           uploadedEntries.push({ entry, storagePath });

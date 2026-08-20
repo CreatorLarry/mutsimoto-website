@@ -110,3 +110,21 @@ test("connects branch and document content management", async () => {
   assert.match(security, /'catalogues', 'catalogues', true/);
   assert.match(security, /storage_content_insert/);
 });
+
+test("keeps catalogue imports conflict-safe and image-aware", async () => {
+  const [serverImport, workflow, imageUpload, importTypes] = await Promise.all([
+    readFile(new URL("lib/admin/product-import.ts", root), "utf8"),
+    readFile(new URL("components/admin/product-import-workflow.tsx", root), "utf8"),
+    readFile(new URL("lib/client/product-import-images.ts", root), "utf8"),
+    readFile(new URL("types/product-import.ts", root), "utf8"),
+  ]);
+
+  assert.match(serverImport, /resolveVehicleBrand/);
+  assert.match(serverImport, /\.eq\("slug", slug\)/);
+  assert.match(serverImport, /publication_status: "draft" as const/);
+  assert.match(serverImport, /existing\?\.slug/);
+  assert.match(importTypes, /action: "created" \| "updated"/);
+  assert.match(workflow, /product\.action === "updated"/);
+  assert.match(workflow, /New part numbers are always created as drafts/);
+  assert.match(imageUpload, /attempt <= 3/);
+});
