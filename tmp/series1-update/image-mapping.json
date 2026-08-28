@@ -1,0 +1,178 @@
+[
+  {
+    "partNumber": "SFF-1001",
+    "excelRow": 3,
+    "sourceColumn": 21,
+    "sourceMedia": "xl/media/image17.jpeg",
+    "filename": "SFF-1001-1.jpeg",
+    "size": 29906
+  },
+  {
+    "partNumber": "SFF-1001",
+    "excelRow": 3,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image1.png",
+    "filename": "SFF-1001-2.png",
+    "size": 69954
+  },
+  {
+    "partNumber": "SFF-1004",
+    "excelRow": 6,
+    "sourceColumn": 21,
+    "sourceMedia": "xl/media/image18.jpeg",
+    "filename": "SFF-1004-1.jpeg",
+    "size": 36982
+  },
+  {
+    "partNumber": "SFF-1004",
+    "excelRow": 6,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image2.jpeg",
+    "filename": "SFF-1004-2.jpeg",
+    "size": 9748
+  },
+  {
+    "partNumber": "PFF-1004",
+    "excelRow": 7,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image3.jpeg",
+    "filename": "PFF-1004-1.jpeg",
+    "size": 9159
+  },
+  {
+    "partNumber": "SFF-1005",
+    "excelRow": 8,
+    "sourceColumn": 21,
+    "sourceMedia": "xl/media/image19.jpeg",
+    "filename": "SFF-1005-1.jpeg",
+    "size": 35914
+  },
+  {
+    "partNumber": "SFF-1006-M",
+    "excelRow": 9,
+    "sourceColumn": 21,
+    "sourceMedia": "xl/media/image20.jpeg",
+    "filename": "SFF-1006-M-1.jpeg",
+    "size": 35654
+  },
+  {
+    "partNumber": "SFF-1008",
+    "excelRow": 11,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image4.png",
+    "filename": "SFF-1008-1.png",
+    "size": 69906
+  },
+  {
+    "partNumber": "SFF-1009",
+    "excelRow": 12,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image5.png",
+    "filename": "SFF-1009-1.png",
+    "size": 59843
+  },
+  {
+    "partNumber": "PGF-1009",
+    "excelRow": 13,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image5.png",
+    "filename": "PGF-1009-1.png",
+    "size": 59843
+  },
+  {
+    "partNumber": "SFF-1010",
+    "excelRow": 14,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image6.png",
+    "filename": "SFF-1010-1.png",
+    "size": 89309
+  },
+  {
+    "partNumber": "SFF-1011",
+    "excelRow": 15,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image7.png",
+    "filename": "SFF-1011-1.png",
+    "size": 69276
+  },
+  {
+    "partNumber": "FGF-1014",
+    "excelRow": 25,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image8.png",
+    "filename": "FGF-1014-1.png",
+    "size": 67327
+  },
+  {
+    "partNumber": "SFF-1015",
+    "excelRow": 26,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image9.png",
+    "filename": "SFF-1015-1.png",
+    "size": 308079
+  },
+  {
+    "partNumber": "PGF-1017",
+    "excelRow": 28,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image10.png",
+    "filename": "PGF-1017-1.png",
+    "size": 53557
+  },
+  {
+    "partNumber": "PFF-1018",
+    "excelRow": 29,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image11.png",
+    "filename": "PFF-1018-1.png",
+    "size": 71439
+  },
+  {
+    "partNumber": "SFF-1020",
+    "excelRow": 31,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image12.png",
+    "filename": "SFF-1020-1.png",
+    "size": 72730
+  },
+  {
+    "partNumber": "PGF-1023",
+    "excelRow": 35,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image13.png",
+    "filename": "PGF-1023-1.png",
+    "size": 39737
+  },
+  {
+    "partNumber": "SFF-1025",
+    "excelRow": 37,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image14.png",
+    "filename": "SFF-1025-1.png",
+    "size": 96469
+  },
+  {
+    "partNumber": "PFF-1025",
+    "excelRow": 38,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image14.png",
+    "filename": "PFF-1025-1.png",
+    "size": 96469
+  },
+  {
+    "partNumber": "SFF-1026",
+    "excelRow": 39,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image15.png",
+    "filename": "SFF-1026-1.png",
+    "size": 59661
+  },
+  {
+    "partNumber": "SFF-1027",
+    "excelRow": 40,
+    "sourceColumn": 34,
+    "sourceMedia": "xl/media/image16.png",
+    "filename": "SFF-1027-1.png",
+    "size": 86902
+  }
+]

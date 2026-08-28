@@ -1,0 +1,15 @@
+PROPOSED 13-CATEGORY APPLICATION SYSTEM - COPY APPROVAL REQUIRED
+
+01 Light Commercial Vehicles
+02 Heavy Commercial Vehicles
+03 Matatus & PSVs
+04 Passenger Cars
+05 4WDs & SUVs
+06 Pickups
+07 Generators
+08 Construction Equipment
+09 Mining Equipment
+10 Agricultural Machinery
+11 Tractors
+12 Compressors
+13 Industrial & Plant Machinery

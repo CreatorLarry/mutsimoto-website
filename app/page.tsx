@@ -9,7 +9,7 @@ import { CategoryCard } from "@/components/products/category-card";
 import { ProductCard } from "@/components/products/product-card";
 import { ButtonLink } from "@/components/ui/button-link";
 import { CallToAction } from "@/components/ui/call-to-action";
-import { FilterShowcase } from "@/components/hero/filter-showcase";
+import { HeroBackgroundCarousel } from "@/components/hero/hero-background-carousel";
 import { SearchBar } from "@/components/ui/search-bar";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getBranches } from "@/lib/branches";
@@ -29,23 +29,19 @@ export default async function Home() {
 
   return (
     <>
-      <section className="blueprint-grid-dark dark-panel relative overflow-hidden border-b border-[#353d43] bg-[radial-gradient(circle_at_15%_28%,rgba(239,51,64,0.11),transparent_25%),linear-gradient(118deg,#0a0d0f_0%,#171c20_56%,#0d1114_100%)]">
+      <section className="dark-panel relative isolate overflow-hidden border-b border-[#353d43] bg-[#080b0d]">
+        <HeroBackgroundCarousel />
         <div className="absolute -left-32 top-24 size-72 rotate-45 rounded-none border-[42px] border-white/[0.025]" aria-hidden="true" />
-        <div className="absolute right-[42%] top-20 size-3 rounded-none bg-[#ef3340] shadow-[0_0_0_10px_rgba(239,51,64,0.1)]" aria-hidden="true" />
-        <div className="relative mx-auto grid min-h-[690px] max-w-7xl items-center gap-12 px-5 py-14 sm:px-8 lg:grid-cols-[1.03fr_0.97fr] lg:px-10 lg:py-20">
-          <div>
-            <p className="inline-flex items-center gap-2 border-l-2 border-[#ef3340] bg-[#1a2025] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#f4f5f5] shadow-sm"><span className="size-2 rounded-none bg-[#ef3340]" /> Automotive &amp; industrial filtration</p>
-            <h1 className="mt-7 max-w-3xl text-5xl font-black uppercase leading-[0.95] tracking-[-0.055em] text-white sm:text-6xl lg:text-[72px]">Filtration Solutions Built for Performance</h1>
-            <p className="mt-6 max-w-2xl text-lg font-medium leading-8 text-[#c9cdd0]">Oil, fuel, and air filters—plus custom filters and complete filtration solutions—engineered around the vehicles, machinery, and power systems that keep your operation moving.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row"><ButtonLink href="/products">Explore products <ArrowRight className="size-4" /></ButtonLink><ButtonLink href="/downloads" variant="outline"><BookOpen className="size-4" /> View catalogues</ButtonLink></div>
-            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 text-xs font-semibold uppercase tracking-[0.05em] text-[#b9bec2]">{["12+ prototype references", "OEM cross-reference", "Technical support"].map((item) => <span key={item} className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#ef3340]" />{item}</span>)}</div>
-          </div>
-
-          <div className="relative lg:-mr-5">
-            <FilterShowcase />
+        <div className="pointer-events-none relative z-10 mx-auto flex min-h-[690px] max-w-7xl items-center px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+          <div className="hero-copy pointer-events-auto max-w-[520px]">
+            <p className="inline-flex items-center gap-2 border-l-2 border-[#ef3340] bg-[#1a2025]/90 px-3 py-2 text-[9px] font-extrabold uppercase tracking-[0.15em] text-[#f4f5f5] shadow-sm"><span className="size-1.5 rounded-none bg-[#ef3340]" /> MADE IN KENYA, BY KENYANS, FOR AFRICA</p>
+            <h1 className="mt-5 max-w-xl text-[34px] font-black uppercase leading-[0.98] tracking-[-0.045em] text-white sm:text-[40px] lg:text-[48px]">Filtration Solutions Built for Performance</h1>
+            <p className="mt-4 max-w-[490px] text-sm font-medium leading-6 text-[#f1f2f3]">Oil, fuel, and air filters, custom filters and complete filtration solutions, engineered around the vehicles, machinery, and power systems that keep your operation moving.</p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row"><ButtonLink href="/products">Explore products <ArrowRight className="size-4" /></ButtonLink><ButtonLink href="/downloads" variant="outline"><BookOpen className="size-4" /> View catalogues</ButtonLink></div>
+            <div className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.045em] text-[#e4e6e7]">{["12+ prototype references", "OEM cross-reference", "Technical support"].map((item) => <span key={item} className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-3.5 text-[#ef3340]" />{item}</span>)}</div>
           </div>
         </div>
-        <div className="relative mx-auto max-w-7xl px-5 pb-10 sm:px-8 lg:px-10">
+        <div className="relative z-10 mx-auto max-w-7xl px-5 pb-10 sm:px-8 lg:px-10">
           <div className="rounded-lg border border-[#353d43] border-l-[3px] border-l-[#ef3340] bg-[#14191d] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.4)] sm:p-5"><p className="mb-3 px-2 text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#c9cdd0]">Find the right filter in seconds</p><SearchBar submitHref="/products" placeholder="Search by part number, OEM number, vehicle, engine, or equipment" /></div>
         </div>
       </section>

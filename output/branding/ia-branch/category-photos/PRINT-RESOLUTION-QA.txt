@@ -1,0 +1,18 @@
+MUTSIMOTO IA CATEGORY BANNERS - EFFECTIVE PHOTO RESOLUTION AT FINAL SIZE
+PDF scale: 1:10. Typography, rules and corporate mark: vector.
+
+01  01-light-commercial-vehicle.jpg  87.2 effective ppi
+02  02-heavy-commercial-vehicle.jpg  71.5 effective ppi
+03  03-matatus-psvs.jpg  86.1 effective ppi
+04  04-passenger-cars.jpg  86.1 effective ppi
+05  05-4wd-suv.jpg  74.4 effective ppi
+06  06-pickups.jpg  71.8 effective ppi
+07  07-generators.jpg  130.2 effective ppi
+08  08-construction-equipment.jpg  68.3 effective ppi
+09  09-mining-equipment.jpg  111.6 effective ppi
+10  10-agricultural-machinery.jpg  62.4 effective ppi
+11  11-tractors.jpg  50.0 effective ppi
+12  12-compressors.jpg  85.7 effective ppi
+13  13-industrial-plant-machinery.jpg  54.5 effective ppi
+
+Large-format viewing guidance: preserve original image streams; do not rasterise the PDF; output at the stated final dimensions.
