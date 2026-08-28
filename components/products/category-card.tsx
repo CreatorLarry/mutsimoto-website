@@ -4,11 +4,11 @@ import { ArrowRight } from "lucide-react";
 import type { Category } from "@/types";
 
 const imageClasses: Record<string, string> = {
-  "oil-element": "object-cover object-[67%_center] group-hover:scale-[1.035]",
-  "oil-spin-on": "object-cover object-center group-hover:scale-[1.035]",
-  "fuel-elements": "object-cover object-[62%_center] group-hover:scale-[1.035]",
-  "fuel-spin-on": "object-cover object-center group-hover:scale-[1.035]",
-  "air-cleaners": "object-contain scale-[1.55] group-hover:scale-[1.61]",
+  "oil-element": "object-cover object-[40%_center] group-hover:scale-[1.015]",
+  "oil-spin-on": "object-cover object-[38%_center] group-hover:scale-[1.01]",
+  "fuel-elements": "object-cover object-[38%_center] group-hover:scale-[1.015]",
+  "fuel-spin-on": "object-cover object-center group-hover:scale-[1.015]",
+  "air-cleaners": "-translate-y-[12%] object-contain object-center scale-[1.48] group-hover:scale-[1.5]",
 };
 
 export function CategoryCard({ category }: { category: Category }) {
