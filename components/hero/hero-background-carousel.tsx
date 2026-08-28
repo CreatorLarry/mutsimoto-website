@@ -11,13 +11,38 @@ const slides = [
     position: "center 65%",
   },
   {
+    src: "/images/hero-carousel/light-commercial.webp",
+    label: "Light commercial and bus filtration",
+    position: "center 65%",
+  },
+  {
     src: "/images/hero-carousel/automotive.webp",
     label: "Automotive filtration",
     position: "center 66%",
   },
   {
+    src: "/images/hero-carousel/passenger-vehicles.webp",
+    label: "Passenger vehicle filtration",
+    position: "center 64%",
+  },
+  {
+    src: "/images/hero-carousel/pickups.webp",
+    label: "Pick-up filtration",
+    position: "center 63%",
+  },
+  {
+    src: "/images/hero-carousel/trucks.webp",
+    label: "Truck filtration",
+    position: "center 65%",
+  },
+  {
     src: "/images/hero-carousel/industrial.webp",
     label: "Industrial filtration",
+    position: "center 63%",
+  },
+  {
+    src: "/images/hero-carousel/agriculture.webp",
+    label: "Agricultural filtration",
     position: "center 63%",
   },
   {
@@ -26,14 +51,24 @@ const slides = [
     position: "center 62%",
   },
   {
+    src: "/images/hero-carousel/railway.webp",
+    label: "Railway engine filtration",
+    position: "center 62%",
+  },
+  {
     src: "/images/hero-carousel/motorcycles.webp",
     label: "Motorcycle filtration",
     position: "center 62%",
   },
   {
-    src: "/images/hero-carousel/trucks.webp",
-    label: "Truck filtration",
-    position: "center 65%",
+    src: "/images/hero-carousel/custom-filters.webp",
+    label: "Custom filter engineering",
+    position: "center 56%",
+  },
+  {
+    src: "/images/hero-carousel/motokool-coolant.webp",
+    label: "MotoKool cooling protection",
+    position: "center 55%",
   },
 ] as const;
 
