@@ -1,4 +1,5 @@
 import type { Branch } from "@/types";
+import { COMPANY_CONTACT } from "@/data/company-contact";
 
 export const branches: Branch[] = [
   
@@ -6,11 +7,11 @@ export const branches: Branch[] = [
     id: "nakuru",
     name: "Nakuru Head Office",
     location: "Biashara Street, Nakuru, Kenya",
-    phone: "+254 721 901 129",
+    phone: COMPANY_CONTACT.phone.label,
     email: "sales@mutsimoto.com",
     openingHours: "Mon–Fri 8:00–17:00 · Sat 8:30–13:00",
     directionsUrl: "https://maps.app.goo.gl/njkjDXTSb9Q5UQZ18",
-    whatsappUrl: "https://wa.me/254721901129",
+    whatsappUrl: COMPANY_CONTACT.whatsapp.href,
   },
   {
     id: "nairobi-industrial-area",
@@ -20,7 +21,7 @@ export const branches: Branch[] = [
     email: "iabranch@mutsimoto.com",
     openingHours: "Mon–Fri 8:00–17:00 · Sat 8:30–13:00",
     directionsUrl: "https://maps.app.goo.gl/5JQ5JQ5JQ5JQ5JQ5",
-    whatsappUrl: "https://wa.me/254726692705",
+    whatsappUrl: COMPANY_CONTACT.whatsapp.href,
   },
   {
     id: "nairobi-kirinyaga-road",
@@ -30,7 +31,7 @@ export const branches: Branch[] = [
     email: "krbranch@mutsimoto.com",
     openingHours: "Mon–Fri 8:00–17:00 · Sat 8:30–13:00",
     directionsUrl: "https://maps.app.goo.gl/5JQ5JQ5JQ5JQ5JQ5",
-    whatsappUrl: "https://wa.me/254713541204",
+    whatsappUrl: COMPANY_CONTACT.whatsapp.href,
   },
   {
     id: "mombasa",
@@ -40,6 +41,6 @@ export const branches: Branch[] = [
     email: "msabranch@mutsimoto.co.ke",
     openingHours: "Mon–Fri 8:00–17:00 · Sat 8:30–13:00",
     directionsUrl: "https://maps.app.goo.gl/5JQ5JQ5JQ5JQ5JQ5",
-    whatsappUrl: "https://wa.me/254733550025",
+    whatsappUrl: COMPANY_CONTACT.whatsapp.href,
   },
 ];

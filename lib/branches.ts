@@ -1,6 +1,7 @@
 import "server-only";
 
 import { branches as mockBranches } from "@/data/branches";
+import { COMPANY_CONTACT } from "@/data/company-contact";
 import { isSupabaseConfigured, shouldUseMockData } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import type { Branch } from "@/types";
@@ -19,10 +20,6 @@ interface BranchRecord {
   longitude: number | string | null;
 }
 
-function whatsappUrl(number: string): string {
-  return `https://wa.me/${number.replace(/\D/g, "")}`;
-}
-
 function mapBranch(record: BranchRecord): Branch {
   const location = [record.address, record.city, "Kenya"].filter(Boolean).join(", ");
   const hasCoordinates = record.latitude !== null && record.longitude !== null;
@@ -31,11 +28,11 @@ function mapBranch(record: BranchRecord): Branch {
     id: record.slug,
     name: record.name,
     location,
-    phone: record.phone,
+    phone: record.slug === "nakuru" ? COMPANY_CONTACT.phone.label : record.phone,
     email: record.email,
     openingHours: record.opening_hours,
     directionsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
-    whatsappUrl: whatsappUrl(record.whatsapp || record.phone),
+    whatsappUrl: COMPANY_CONTACT.whatsapp.href,
   };
 }
 

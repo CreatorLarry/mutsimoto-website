@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FilterDrawer } from "@/components/products/filter-drawer";
 import { FilterSidebar, type CatalogueFilters, type FilterOptions } from "@/components/products/filter-sidebar";
 import { ProductCard } from "@/components/products/product-card";
@@ -140,6 +140,8 @@ export function CatalogueExplorer({
     setPage(1);
   }
 
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+
   function goToPage(nextPage: number) {
     const safePage = Math.min(Math.max(nextPage, 1), pageCount);
     if (safePage === page) return;
@@ -164,7 +166,7 @@ export function CatalogueExplorer({
       <div className="mt-7 flex flex-col gap-4 border-b border-[#353d43] pb-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm uppercase tracking-[0.06em] text-[#aeb4b8]"><strong className="font-mono text-[#ef3340]">{filteredProducts.length}</strong> products found</p>
         <div className="flex gap-2">
-          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-md border border-[#697177] bg-[#171c20] px-5 text-xs font-extrabold uppercase tracking-[0.06em] text-white hover:border-white lg:hidden"><SlidersHorizontal className="size-4" /> Filters</button>
+          <button type="button" onClick={() => setDrawerOpen(true)} className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-md border border-[#697177] bg-[#171c20] px-5 text-xs font-extrabold uppercase tracking-[0.06em] text-white hover:border-white lg:hidden" aria-expanded={drawerOpen} aria-controls="product-filter-dialog"><SlidersHorizontal className="size-4" aria-hidden="true" /> Filters</button>
           <label className="sr-only" htmlFor="sort-products">Sort products</label>
           <select
             id="sort-products"
@@ -229,7 +231,7 @@ export function CatalogueExplorer({
         </div>
       </div>
 
-      <FilterDrawer open={drawerOpen} filters={filters} options={options} onChange={handleFilterChange} onReset={reset} onClose={() => setDrawerOpen(false)} resultCount={filteredProducts.length} />
+      <FilterDrawer open={drawerOpen} filters={filters} options={options} onChange={handleFilterChange} onReset={reset} onClose={closeDrawer} resultCount={filteredProducts.length} />
     </div>
   );
 }

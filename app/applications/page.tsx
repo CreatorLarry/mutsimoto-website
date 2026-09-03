@@ -5,10 +5,15 @@ import { ArrowRight, CarFront, Construction, Factory, Tractor, Truck, Zap } from
 import type { LucideIcon } from "lucide-react";
 import { CallToAction } from "@/components/ui/call-to-action";
 import { PageHero } from "@/components/ui/page-hero";
+import { createPageMetadata } from "@/lib/metadata";
 import { applicationMedia } from "@/data/application-media";
 import { applications } from "@/data/applications";
 
-export const metadata: Metadata = { title: "Applications", description: "Browse Mutsimoto filters for automotive, commercial, construction, agriculture, industrial, and power generation applications." };
+export const metadata: Metadata = createPageMetadata({
+  title: "Filter Applications",
+  description: "Browse Mutsimoto filters for automotive, commercial, construction, agriculture, industrial, and power generation applications.",
+  path: "/applications",
+});
 
 const groupIcons: Record<string, LucideIcon> = { Automotive: CarFront, Commercial: Truck, Construction, Agriculture: Tractor, Industrial: Factory, "Power generation": Zap };
 

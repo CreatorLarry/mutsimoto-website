@@ -14,6 +14,7 @@
   --muted-strong: #c9cdd0;
   --brand-red: #ef3340;
   --brand-red-dark: #bd202c;
+  --focus-ring: #ff9ca4;
   --graphite: #11161a;
   --steel: #53565a;
   --theme-heading: #ffffff;
@@ -44,6 +45,7 @@ html[data-theme="light"] {
   --muted-strong: #384147;
   --graphite: #f4f6f7;
   --steel: #697177;
+  --focus-ring: #a9121e;
   --theme-heading: #171c20;
   --theme-text: #384147;
   --theme-text-secondary: #535d63;
@@ -107,6 +109,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
 
 .admin-control-surface {
   color-scheme: light;

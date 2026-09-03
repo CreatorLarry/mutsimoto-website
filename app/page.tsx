@@ -13,7 +13,15 @@ import { HeroBackgroundCarousel } from "@/components/hero/hero-background-carous
 import { SearchBar } from "@/components/ui/search-bar";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { getBranches } from "@/lib/branches";
+import { createPageMetadata, DEFAULT_DESCRIPTION } from "@/lib/metadata";
 import { getFeaturedProducts } from "@/lib/products";
+
+export const metadata = createPageMetadata({
+  title: "Mutsimoto Motor Company | Oil, Fuel & Air Filtration",
+  description: DEFAULT_DESCRIPTION,
+  path: "/",
+  absoluteTitle: true,
+});
 
 export default async function Home() {
   const [featuredProducts, branches] = await Promise.all([
@@ -63,7 +71,7 @@ export default async function Home() {
 
       <section className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12"><div className="blueprint-grid-dark dark-panel brushed-metal mx-auto grid max-w-7xl gap-12 overflow-hidden rounded-lg border border-[#353d43] border-l-4 border-l-[#ef3340] bg-[#0d1114] px-6 py-14 text-white shadow-[0_24px_70px_rgba(0,0,0,0.4)] sm:px-10 lg:grid-cols-[0.82fr_1.18fr] lg:px-14 lg:py-20"><div><SectionHeading eyebrow="Why Mutsimoto" title="Filtration knowledge behind every fitment" description="A focused range, practical application guidance, and technical support for confident product selection." light /><ButtonLink href="/about" variant="secondary" className="mt-8">About Mutsimoto <ArrowRight className="size-4" /></ButtonLink></div><div className="grid gap-3 sm:grid-cols-2">{reasons.map(({ icon: Icon, title, text, tone }) => <article key={title} className="rounded-md border border-[#353d43] bg-[#171c20]/90 p-6"><span className={`grid size-11 place-items-center rounded-md border ${tone} text-white`}><Icon className="size-5" /></span><h3 className="mt-5 text-lg font-extrabold uppercase text-white">{title}</h3><p className="mt-2 text-sm font-medium leading-6 text-[#b9bec2]">{text}</p></article>)}</div></div></section>
 
-      <section className="mx-auto my-8 max-w-7xl rounded-lg border border-[#353d43] bg-[#11161a] px-5 py-20 sm:px-8 lg:px-10 lg:py-28"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><SectionHeading eyebrow="Local support" title="Talk to a branch near you" description="Product enquiries, availability checks, and technical support from teams close to your operation." /><ButtonLink href="/branches" variant="outline"><Warehouse className="size-4" /> All branches</ButtonLink></div><div className="mt-12 grid gap-6 md:grid-cols-3">{branches.slice(0, 3).map((branch) => <BranchCard key={branch.id} branch={branch} />)}</div></section>
+      <section className="mx-auto my-8 max-w-7xl rounded-lg border border-[#353d43] bg-[#11161a] px-5 py-20 sm:px-8 lg:px-10 lg:py-28"><div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between"><SectionHeading eyebrow="Local support" title="Talk to a branch near you" description="Product enquiries, availability checks, and technical support from teams close to your operation." /><ButtonLink href="/branches" variant="outline"><Warehouse className="size-4" /> All branches</ButtonLink></div><div className="mt-12 grid gap-6 md:grid-cols-3">{branches.slice(0, 3).map((branch) => <BranchCard key={branch.id} branch={branch} headingLevel={3} />)}</div></section>
 
       <section className="px-5 pb-4 sm:px-8 lg:px-10"><div className="dark-panel brushed-metal mx-auto flex max-w-7xl flex-col gap-8 rounded-lg border border-[#353d43] border-l-4 border-l-[#ef3340] bg-[#14191d] px-6 py-10 text-white shadow-[0_20px_55px_rgba(0,0,0,0.34)] sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-12"><div className="flex gap-5"><span className="hidden size-13 shrink-0 place-items-center rounded-md border border-[#535b61] bg-[#232a30] text-[#ef3340] sm:grid"><BookOpen /></span><div><p className="font-mono text-[10px] font-extrabold uppercase tracking-[0.15em] text-[#ef3340]">Catalogue resources</p><h2 className="mt-2 text-3xl font-extrabold uppercase tracking-[-0.035em] text-white">Take the filter range with you.</h2><p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-[#c9cdd0]">Request the latest catalogue, cross-reference guide, or technical data sheet.</p></div></div><ButtonLink href="/downloads" variant="secondary">Browse downloads <ArrowRight className="size-4" /></ButtonLink></div></section>
 

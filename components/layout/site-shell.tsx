@@ -14,11 +14,16 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only z-[100] rounded-md bg-white px-4 py-3 font-bold text-[#11161a] shadow-xl focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
+      >
+        Skip to main content
+      </a>
       <Header />
-      <main>{children}</main>
+      <main id="main-content" tabIndex={-1}>{children}</main>
       <Footer />
       <WhatsAppFloat />
     </>
   );
 }
-

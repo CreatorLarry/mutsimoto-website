@@ -68,7 +68,7 @@ export default async function EnquiriesAdminPage({ searchParams }: EnquiriesAdmi
                 )}
                 <p className="mt-4 whitespace-pre-line text-sm leading-7 text-[#526176]">{enquiry.message}</p>
                 {enquiry.attachmentUrl && (
-                  <a href={enquiry.attachmentUrl} target="_blank" rel="noreferrer" className="mt-5 block max-w-sm overflow-hidden rounded-2xl border border-[#d9e0e7] bg-[#f4f6f8] p-2 transition hover:border-[#e52833]">
+                  <a href={enquiry.attachmentUrl} target="_blank" rel="noopener noreferrer" className="mt-5 block max-w-sm overflow-hidden rounded-2xl border border-[#d9e0e7] bg-[#f4f6f8] p-2 transition hover:border-[#e52833]">
                     <span className="mb-2 flex items-center gap-2 px-2 pt-1 text-[10px] font-black uppercase tracking-[0.1em] text-[#526176]"><Camera className="size-4 text-[#d51f2a]" /> Customer filter photo · Open full size</span>
                     <Image src={enquiry.attachmentUrl} alt={`Customer attachment for ${enquiry.enquiryNumber}`} width={720} height={480} unoptimized className="h-56 w-full rounded-xl bg-white object-contain" />
                   </a>

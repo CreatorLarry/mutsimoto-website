@@ -1,5 +1,6 @@
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button-link";
+import { COMPANY_CONTACT } from "@/data/company-contact";
 
 interface CallToActionProps {
   eyebrow?: string;
@@ -11,7 +12,7 @@ interface CallToActionProps {
   secondaryHref?: string;
 }
 
-export function CallToAction({ eyebrow = "Talk to our team", title, description, primaryLabel = "Request a Quote", primaryHref = "/contact?type=product", secondaryLabel = "WhatsApp Us", secondaryHref = "https://wa.me/254721901129" }: CallToActionProps) {
+export function CallToAction({ eyebrow = "Talk to our team", title, description, primaryLabel = "Request a Quote", primaryHref = "/contact?type=product", secondaryLabel = "WhatsApp Us", secondaryHref = COMPANY_CONTACT.whatsapp.href }: CallToActionProps) {
   return (
     <section className="px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <div className="blueprint-grid-dark dark-panel brushed-metal mx-auto flex max-w-7xl flex-col gap-8 overflow-hidden rounded-lg border border-[#353d43] border-l-4 border-l-[#ef3340] bg-[#11161a] px-6 py-12 text-white shadow-[0_24px_70px_rgba(0,0,0,0.38)] sm:px-10 lg:flex-row lg:items-center lg:justify-between lg:px-14 lg:py-16">

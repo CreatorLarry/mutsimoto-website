@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { CatalogueExplorer } from "@/components/products/catalogue-explorer";
 import { PageHero } from "@/components/ui/page-hero";
+import { createPageMetadata } from "@/lib/metadata";
 import { getProducts } from "@/lib/products";
 
-export const metadata: Metadata = { title: "Product Catalogue", description: "Search and filter Mutsimoto oil, fuel, and air filters by part number, vehicle, engine, or equipment." };
+export const metadata: Metadata = createPageMetadata({
+  title: "Product Catalogue",
+  description: "Search and filter Mutsimoto oil, fuel, and air filters by part number, vehicle, engine, or equipment.",
+  path: "/products",
+});
 
 interface ProductsPageProps {
   searchParams: Promise<{ q?: string; category?: string; application?: string; equipment?: string }>;

@@ -4,8 +4,13 @@ import { BranchCard } from "@/components/branches/branch-card";
 import { CallToAction } from "@/components/ui/call-to-action";
 import { PageHero } from "@/components/ui/page-hero";
 import { getBranches } from "@/lib/branches";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = { title: "Branches", description: "Find Mutsimoto branch locations, opening hours, phone numbers, and WhatsApp contacts." };
+export const metadata: Metadata = createPageMetadata({
+  title: "Mutsimoto Branches",
+  description: "Find Mutsimoto branch locations, opening hours, phone numbers, and WhatsApp contacts.",
+  path: "/branches",
+});
 
 export default async function BranchesPage() {
   const branches = await getBranches();

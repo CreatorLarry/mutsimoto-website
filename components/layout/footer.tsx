@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/ui/brand-mark";
+import { COMPANY_CONTACT } from "@/data/company-contact";
 
 const productLinks = ["Oil Element", "Oil Spin On", "Fuel Elements", "Fuel Spin On", "Air Cleaners"];
 const companyLinks = [{ label: "About Us", href: "/about" }, { label: "Applications", href: "/applications" }, { label: "Downloads", href: "/downloads" }, { label: "Contact", href: "/contact" }];
@@ -12,9 +13,6 @@ export function Footer() {
         <div>
           <BrandMark light />
           <p className="mt-6 max-w-sm text-sm leading-7 text-[#b9bec2]">Purpose-built oil, fuel, and air filtration for automotive fleets, industrial equipment, and the people who keep them moving.</p>
-          <div className="mt-6 flex gap-2" aria-label="Social media placeholders">
-            {[{ label: "Facebook", mark: "f" }, { label: "Instagram", mark: "ig" }, { label: "LinkedIn", mark: "in" }].map((social) => <a key={social.label} href="/contact" aria-label={social.label} className="grid size-10 place-items-center rounded-md border border-[#535b61] bg-[#14191d] text-xs font-black uppercase text-[#c9cdd0] transition-colors hover:border-[#ef3340] hover:bg-[#d92734] hover:text-white">{social.mark}</a>)}
-          </div>
         </div>
         <div>
           <h2 className="footer-title">Products</h2>
@@ -30,7 +28,8 @@ export function Footer() {
           <h2 className="footer-title">Contact</h2>
           <div className="mt-5 space-y-4 text-sm text-[#b9bec2]">
             <p className="flex gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#ef3340]" />Nakuru Head Office, Nakuru, Kenya</p>
-            <a href="tel:+254721901129" className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#ef3340]" />+254 721 901 129</a>
+            <a href={COMPANY_CONTACT.phone.href} className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#ef3340]" />{COMPANY_CONTACT.phone.label}</a>
+            <a href={COMPANY_CONTACT.hotline.href} className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#ef3340]" />{COMPANY_CONTACT.hotline.label}</a>
             <a href="mailto:sales@mutsimoto.co.ke" className="flex gap-3 hover:text-white"><Mail className="size-4 shrink-0 text-[#ef3340]" />sales@mutsimoto.co.ke</a>
           </div>
         </div>
