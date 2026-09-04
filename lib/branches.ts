@@ -29,7 +29,7 @@ function mapBranch(record: BranchRecord): Branch {
     name: record.name,
     location,
     phone: record.slug === "nakuru" ? COMPANY_CONTACT.phone.label : record.phone,
-    email: record.email,
+    email: record.email.replace(/@mutsimoto\.co\.ke$/i, "@mutsimoto.com"),
     openingHours: record.opening_hours,
     directionsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`,
     whatsappUrl: COMPANY_CONTACT.whatsapp.href,

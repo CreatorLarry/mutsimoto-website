@@ -38,7 +38,7 @@ export const branches: Branch[] = [
     name: "Mombasa Branch",
     location: "Jomo Kenyatta Avenue - Station Road, Mombasa, Kenya",
     phone: "+254 733 550 025",
-    email: "msabranch@mutsimoto.co.ke",
+    email: "msabranch@mutsimoto.com",
     openingHours: "Mon–Fri 8:00–17:00 · Sat 8:30–13:00",
     directionsUrl: "https://maps.app.goo.gl/5JQ5JQ5JQ5JQ5JQ5",
     whatsappUrl: COMPANY_CONTACT.whatsapp.href,

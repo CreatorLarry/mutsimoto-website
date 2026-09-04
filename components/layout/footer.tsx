@@ -30,7 +30,7 @@ export function Footer() {
             <p className="flex gap-3"><MapPin className="mt-0.5 size-4 shrink-0 text-[#ef3340]" />Nakuru Head Office, Nakuru, Kenya</p>
             <a href={COMPANY_CONTACT.phone.href} className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#ef3340]" />{COMPANY_CONTACT.phone.label}</a>
             <a href={COMPANY_CONTACT.hotline.href} className="flex gap-3 hover:text-white"><Phone className="size-4 shrink-0 text-[#ef3340]" />{COMPANY_CONTACT.hotline.label}</a>
-            <a href="mailto:sales@mutsimoto.co.ke" className="flex gap-3 hover:text-white"><Mail className="size-4 shrink-0 text-[#ef3340]" />sales@mutsimoto.co.ke</a>
+            <a href="mailto:sales@mutsimoto.com" className="flex gap-3 hover:text-white"><Mail className="size-4 shrink-0 text-[#ef3340]" />sales@mutsimoto.com</a>
           </div>
         </div>
       </div>
